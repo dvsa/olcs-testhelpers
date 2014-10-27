@@ -1,6 +1,6 @@
 <?php
 
-namespace Olcs\Test;
+namespace Olcs\TestHelpers;
 
 use Common\Form\Element\DynamicSelect;
 use Mockery as m;
