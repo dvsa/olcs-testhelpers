@@ -1,13 +1,13 @@
 <?php
 
-namespace Olcs\TestHelpers;
+namespace Olcs\TestHelpers\FormTester;
 
 use Common\Form\Element\DynamicSelect;
 use Mockery as m;
 
 /**
  * Class AbstractFormTest
- * @package Common\FormTester
+ * @package Olcs\TestHelpers\FormTester
  */
 abstract class AbstractFormTest extends \PHPUnit_Framework_TestCase
 {
