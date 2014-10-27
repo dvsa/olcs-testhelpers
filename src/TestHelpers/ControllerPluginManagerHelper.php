@@ -10,7 +10,7 @@ class ControllerPluginManagerHelper
      * @param $class
      * @return m\MockInterface
      */
-    protected function getMockPlugin($class)
+    public function getMockPlugin($class)
     {
         if (strpos($class, '\\') === false) {
             $class = 'Zend\Mvc\Controller\Plugin\\' . $class;
@@ -25,7 +25,7 @@ class ControllerPluginManagerHelper
      * @param $plugins
      * @return m\MockInterface|\Zend\Mvc\Controller\PluginManager
      */
-    protected function getMockPluginManager($plugins)
+    public function getMockPluginManager($plugins)
     {
         $mockPluginManager = m::mock('Zend\Mvc\Controller\PluginManager');
         $mockPluginManager->shouldReceive('setController');
