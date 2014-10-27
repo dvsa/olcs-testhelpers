@@ -1,6 +1,6 @@
 <?php
 
-namespace Olcs\Test;
+namespace Olcs\TestHelpers;
 
 use Mockery as m;
 
