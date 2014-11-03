@@ -1,0 +1,95 @@
+<?php
+
+namespace Olcs\TestHelpers;
+
+use Mockery as m;
+use Zend\View\HelperPluginManager;
+use Olcs\TestHelpers\ControllerPluginManagerHelper;
+use Zend\View\Helper\Placeholder;
+use Zend\Form\Form;
+use Common\Form\Annotation\CustomAnnotationBuilder;
+
+/**
+ * When a controller use parent::addAction or parent::editAction,
+ * it will often be possible to reuse the service and plugin managers provided here
+ * @author Ian Lindsay <ian@hemera-business-services.co.uk>
+ */
+class ControllerAddEditHelper
+{
+    protected $form;
+
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    public function setForm($form)
+    {
+        $this->form = $form;
+        return $this;
+    }
+
+    /**
+     * Gets a mock service manager
+     *
+     * @param string $formAction
+     * @param array $mockResult
+     * @return m\MockInterface
+     */
+    public function getServiceManager($formAction, $mockResult, $formName)
+    {
+        $form = new Form();
+        $form->setAttribute('action', $formAction);
+        $this->setForm($form);
+
+        $mockRestHelper = m::mock('RestHelper');
+        $mockRestHelper->shouldReceive('makeRestCall')->withAnyArgs()->andReturn($mockResult);
+
+        $stringHelper = m::mock('\Common\Service\Helper\StringHelperService');
+        $stringHelper->shouldReceive('dashToCamel')->withAnyArgs()->andReturn('name');
+
+        $formAnnotationBuilder = new CustomAnnotationBuilder();
+
+        $olcsCustomForm = m::mock('\Common\Service\Form\OlcsCustomFormFactory');
+        $olcsCustomForm->shouldReceive('createForm')->with($formName)->andReturn($form);
+
+        $placeholder = new Placeholder();
+
+        $mockViewHelperManager = new HelperPluginManager();
+        $mockViewHelperManager->setService('placeholder', $placeholder);
+
+        $mockServiceManager = m::mock('\Zend\ServiceManager\ServiceManager');
+        $mockServiceManager->shouldReceive('get')->with('HelperService')->andReturnSelf();
+        $mockServiceManager->shouldReceive('get')->with('FormAnnotationBuilder')->andReturn($formAnnotationBuilder);
+        $mockServiceManager->shouldReceive('get')->with('OlcsCustomForm')->andReturn($olcsCustomForm);
+        $mockServiceManager->shouldReceive('getHelperService')->with('RestHelper')->andReturn($mockRestHelper);
+        $mockServiceManager->shouldReceive('get->getHelperService')->with('RestService')->andReturn($mockRestHelper);
+        $mockServiceManager->shouldReceive('getHelperService')->with('StringHelper')->andReturn($stringHelper);
+        $mockServiceManager->shouldReceive('get')->with('viewHelperManager')->andReturn($mockViewHelperManager);
+
+        return $mockServiceManager;
+    }
+
+    /**
+     * @param string $action
+     * @param int $caseId
+     * @param int $licence
+     * @return m\MockInterface|\Zend\Mvc\Controller\PluginManager
+     */
+    public function getPluginManager($action, $caseId, $licence, $identifierName, $identifierId)
+    {
+        $pluginHelper = new ControllerPluginManagerHelper();
+        $mockPluginManager = $pluginHelper->getMockPluginManager(['params' => 'Params']);
+
+        $mockParams = $mockPluginManager->get('params', '');
+        $mockParams->shouldReceive('fromRoute')->with('action')->andReturn($action);
+        $mockParams->shouldReceive('fromRoute')->with($identifierName)->andReturn($identifierId);
+        $mockParams->shouldReceive('fromQuery')->with('licence', '')->andReturn($licence);
+
+        if ($action == 'add') {
+            $mockParams->shouldReceive('fromQuery')->with('case', '')->andReturn($caseId);
+        }
+
+        return $mockPluginManager;
+    }
+}
