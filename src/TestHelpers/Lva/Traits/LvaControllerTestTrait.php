@@ -19,8 +19,14 @@ trait LvaControllerTestTrait
     protected $formHelper;
     protected $services = [];
 
+    abstract protected function getServiceManager();
+
     protected function mockController($className)
     {
+        $this->sm = $this->getServiceManager();
+
+        $this->request = m::mock('\Zend\Http\Request')->makePartial();
+
         $this->sut = m::mock($className)
             ->makePartial()
             ->shouldAllowMockingProtectedMethods();
