@@ -33,6 +33,7 @@ class ControllerPluginManagerHelper
         foreach ($plugins as $name => $class) {
             $mockPlugin = $this->getMockPlugin($class);
             $mockPluginManager->shouldReceive('get')->with($name, '')->andReturn($mockPlugin);
+            $mockPluginManager->shouldReceive('get')->with($name)->andReturn($mockPlugin);
         }
 
         return $mockPluginManager;
