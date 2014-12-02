@@ -90,6 +90,11 @@ class ControllerAddEditHelper
             $mockParams->shouldReceive('fromQuery')->with('case', '')->andReturn($caseId);
         }
 
+        $mockParams->shouldReceive('fromQuery')->with('application', '')->andReturn('application');
+        $mockParams->shouldReceive('fromRoute')->with('application', '')->andReturn('application');
+        $mockParams->shouldReceive('fromQuery')->with('transportManager', '')->andReturn('transportManager');
+        $mockParams->shouldReceive('fromRoute')->with('transportManager', '')->andReturn('transportManager');
+
         return $mockPluginManager;
     }
 }
