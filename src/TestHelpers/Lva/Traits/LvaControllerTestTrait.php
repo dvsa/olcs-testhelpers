@@ -95,6 +95,9 @@ trait LvaControllerTestTrait
         $formHelper
             ->shouldReceive('createForm')
             ->with($formName)
+            ->andReturn($mockForm)
+            ->shouldReceive('createFormWithRequest')
+            ->with($formName, $this->request)
             ->andReturn($mockForm);
 
         return $mockForm;
