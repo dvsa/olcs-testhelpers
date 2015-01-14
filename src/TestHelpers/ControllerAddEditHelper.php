@@ -85,6 +85,7 @@ class ControllerAddEditHelper
         $mockParams->shouldReceive('fromRoute')->with('action')->andReturn($action);
         $mockParams->shouldReceive('fromRoute')->with($identifierName)->andReturn($identifierId);
         $mockParams->shouldReceive('fromQuery')->with('licence', '')->andReturn($licence);
+        $mockParams->shouldReceive('fromRoute')->with('licence', '')->andReturn($licence);
 
         if ($action == 'add') {
             $mockParams->shouldReceive('fromQuery')->with('case', '')->andReturn($caseId);
