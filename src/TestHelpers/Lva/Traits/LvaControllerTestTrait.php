@@ -150,4 +150,19 @@ trait LvaControllerTestTrait
             )
             ->getMock();
     }
+
+    /**
+     * Stub the translator service's 'translate' method to just return its input
+     *
+     * @return null
+     */
+    protected function stubTranslator()
+    {
+        $this->mockService('translator', 'translate')
+            ->andReturnUsing(
+                function ($input) {
+                    return $input;
+                }
+            );
+    }
 }
