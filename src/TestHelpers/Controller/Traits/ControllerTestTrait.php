@@ -1,15 +1,15 @@
 <?php
 
-namespace Olcs\TestHelpers\Lva\Traits;
+namespace Olcs\TestHelpers\Controller\Traits;
 
 use Mockery as m;
 
 /**
- * Helper functions for testing LVA controllers
+ * Helper functions for testing controllers
  *
  * @author Nick Payne <nick.payne@valtech.co.uk>
  */
-trait LvaControllerTestTrait
+trait ControllerTestTrait
 {
     protected $sm;
     protected $sut;
@@ -149,6 +149,13 @@ trait LvaControllerTestTrait
                 ->getMock()
             )
             ->getMock();
+    }
+
+    protected function mockQueryString($queryString)
+    {
+        $params = new \Zend\Stdlib\Parameters();
+        $params->fromString($queryString);
+        $this->request->setQuery($params);
     }
 
     /**
