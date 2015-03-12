@@ -45,12 +45,15 @@ class ControllerAddEditHelper
         $mockRestHelper = m::mock('RestHelper');
         $mockRestHelper->shouldReceive('makeRestCall')->withAnyArgs()->andReturn($mockResult);
 
-        $stringHelper = m::mock('\Common\Service\Helper\StringHelperService');
-        $stringHelper->shouldReceive('dashToCamel')->withAnyArgs()->andReturn('name');
+        // tons of legacy tests relied on this helper being mocked incorrectly...
+        $stringHelper = new \Common\Service\Helper\StringHelperService();
+        // ... meaning they never actually relied on the return value, and thus
+        // got away with formName being incorrectly all lowercased
+        $formName = ucfirst($formName);
 
         $formAnnotationBuilder = new CustomAnnotationBuilder();
 
-        $olcsCustomForm = m::mock('\Common\Service\Form\OlcsCustomFormFactory');
+        $olcsCustomForm = m::mock('\Common\Service\Helper\FormHelperService');
         $olcsCustomForm->shouldReceive('createForm')->with($formName)->andReturn($form);
 
         $placeholder = new Placeholder();
@@ -59,11 +62,9 @@ class ControllerAddEditHelper
         $mockViewHelperManager->setService('placeholder', $placeholder);
 
         $mockServiceManager = m::mock('\Zend\ServiceManager\ServiceManager');
-        //$mockServiceManager->shouldReceive('get')->with('HelperService')->andReturnSelf();
         $mockServiceManager->shouldReceive('get')->with('FormAnnotationBuilder')->andReturn($formAnnotationBuilder);
-        $mockServiceManager->shouldReceive('get')->with('OlcsCustomForm')->andReturn($olcsCustomForm);
+        $mockServiceManager->shouldReceive('get')->with('Helper\Form')->andReturn($olcsCustomForm);
         $mockServiceManager->shouldReceive('get')->with('Helper\Rest')->andReturn($mockRestHelper);
-        //$mockServiceManager->shouldReceive('get->getHelperService')->with('RestService')->andReturn($mockRestHelper);
         $mockServiceManager->shouldReceive('get')->with('Helper\String')->andReturn($stringHelper);
         $mockServiceManager->shouldReceive('get')->with('viewHelperManager')->andReturn($mockViewHelperManager);
 
