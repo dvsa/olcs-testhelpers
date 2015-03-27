@@ -156,6 +156,8 @@ trait ControllerTestTrait
         $params = new \Zend\Stdlib\Parameters();
         $params->fromString($queryString);
         $this->request->setQuery($params);
+
+        return $params;
     }
 
     /**
