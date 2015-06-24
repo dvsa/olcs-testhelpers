@@ -172,4 +172,60 @@ trait ControllerTestTrait
                 }
             );
     }
+
+    /**
+     * @param string $class expected Command class name
+     * @param array $expectedDtoData
+     * @param array $result to be returned by $response->getResult()
+     * @param boolean $ok to be returned by $response->isOk()
+     */
+    protected function expectCommand($class, array $expectedDtoData, array $result, $ok = true)
+    {
+        return $this->mockCommandOrQueryCall('handleCommand', $class, $expectedDtoData, $result, $ok);
+    }
+
+    /**
+     * @param string $class expected Query class name
+     * @param array $expectedDtoData
+     * @param array $result to be returned by $response->getResult()
+     * @param boolean $ok to be returned by $response->isOk()
+     */
+    protected function expectQuery($class, array $expectedDtoData, array $result, $ok = true)
+    {
+        return $this->mockCommandOrQueryCall('handleQuery', $class, $expectedDtoData, $result, $ok);
+    }
+
+    /**
+     * @param string $method controller/plugin method to mock 'handleQuery'|'handleCommand'
+     * @param string $class expected Query/Command class name
+     * @param array $expectedDtoData
+     * @param array $result to be returned by $response->getResult()
+     * @param boolean $ok to be returned by $response->isOk()
+     */
+    private function mockCommandOrQueryCall($method, $class, array $expectedDtoData, array $result, $ok = true)
+    {
+        $response = m::mock()
+            ->shouldReceive('isOk')
+            ->andReturn($ok)
+            ->shouldReceive('getResult')
+            ->andReturn($result)
+            ->getMock();
+
+        $this->sut
+            ->shouldReceive($method)
+            ->once()
+            ->with(
+                m::on(
+                    function ($cmd) use ($expectedDtoData, $class) {
+                        $matched = (
+                            is_a($cmd, $class)
+                            &&
+                            $cmd->getArrayCopy() == $expectedDtoData
+                        );
+                        return $matched;
+                    }
+                )
+            )
+            ->andReturn($response);
+    }
 }
