@@ -180,10 +180,11 @@ trait ControllerTestTrait
      * @param array $expectedDtoData
      * @param array $result to be returned by $response->getResult()
      * @param boolean $ok to be returned by $response->isOk()
+     * @param int $times call count
      */
-    protected function expectCommand($class, array $expectedDtoData, array $result, $ok = true)
+    protected function expectCommand($class, array $expectedDtoData, array $result, $ok = true, $times = 1)
     {
-        return $this->mockCommandOrQueryCall('handleCommand', $class, $expectedDtoData, $result, $ok);
+        return $this->mockCommandOrQueryCall('handleCommand', $class, $expectedDtoData, $result, $ok, $times);
     }
 
     /**
@@ -191,10 +192,11 @@ trait ControllerTestTrait
      * @param array $expectedDtoData
      * @param array $result to be returned by $response->getResult()
      * @param boolean $ok to be returned by $response->isOk()
+     * @param int $times call count
      */
-    protected function expectQuery($class, array $expectedDtoData, array $result, $ok = true)
+    protected function expectQuery($class, array $expectedDtoData, array $result, $ok = true, $times = 1)
     {
-        return $this->mockCommandOrQueryCall('handleQuery', $class, $expectedDtoData, $result, $ok);
+        return $this->mockCommandOrQueryCall('handleQuery', $class, $expectedDtoData, $result, $ok, $times);
     }
 
     /**
@@ -203,9 +205,16 @@ trait ControllerTestTrait
      * @param array $expectedDtoData
      * @param array $result to be returned by $response->getResult()
      * @param boolean $ok to be returned by $response->isOk()
+     * @param int $times call count
      */
-    private function mockCommandOrQueryCall($method, $class, array $expectedDtoData, array $result, $ok = true)
-    {
+    private function mockCommandOrQueryCall(
+        $method,
+        $class,
+        array $expectedDtoData,
+        array $result,
+        $ok = true,
+        $times = 1
+    ) {
         $response = m::mock()
             ->shouldReceive('isOk')
             ->andReturn($ok)
@@ -215,7 +224,6 @@ trait ControllerTestTrait
 
         $this->sut
             ->shouldReceive($method)
-            ->once()
             ->with(
                 m::on(
                     function ($cmd) use ($expectedDtoData, $class) {
@@ -228,6 +236,7 @@ trait ControllerTestTrait
                     }
                 )
             )
+            ->times($times)
             ->andReturn($response);
     }
 }
