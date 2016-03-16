@@ -2,6 +2,15 @@
     "name": "olcs/olcs-testhelpers",
     "description": "OLCS Test helpers",
     "type": "library",
+    "repositories": [
+        {
+            "packagist": false
+        },
+        {
+            "url": "http://satis.inf.mgt.mtpdvsa",
+            "type": "composer"
+        }
+    ],
     "require": {
         "php": ">=5.4"
     },
@@ -19,6 +28,7 @@
       "preferred-install": "dist",
         "github-oauth": {
           "github.com": "5cdf40f8d81a7675fdaa5fc92e9381526ef4db7f"
-      }
+      },
+      "secure-http" : false
     }
 }
