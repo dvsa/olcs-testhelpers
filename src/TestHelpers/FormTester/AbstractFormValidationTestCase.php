@@ -25,27 +25,14 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     static private $testedElements = [];
 
-
-    protected function getServiceManager()
-    {
-        return \OlcsTest\Bootstrap::getRealServiceManager();
-    }
+    /**
+     * @var \Common\Form\Form
+     */
+    static $form;
 
     protected function setUp()
     {
-        $serviceManager = $this->getServiceManager();
-        $serviceManager->setAllowOverride(true);
-
-        $serviceManager->get('FormElementManager')->setFactory(
-            'DynamicSelect',
-            function ($serviceLocator, $name, $requestedName) {
-                $element = new DynamicSelect();
-                $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                return $element;
-            }
-        );
-
-        $this->sut = $serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
+        $this->sut = $this->getForm();
     }
 
     /**
@@ -55,19 +42,23 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function getForm()
     {
-        $serviceManager = $this->getServiceManager();
-        $serviceManager->setAllowOverride(true);
+        if (self::$form == null) {
+            $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+            $serviceManager->setAllowOverride(true);
 
-        $serviceManager->get('FormElementManager')->setFactory(
-            'DynamicSelect',
-            function ($serviceLocator, $name, $requestedName) {
-                $element = new DynamicSelect();
-                $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                return $element;
-            }
-        );
+            $serviceManager->get('FormElementManager')->setFactory(
+                'DynamicSelect',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicSelect();
+                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    return $element;
+                }
+            );
 
-        return $serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
+            self::$form = $serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
+        }
+
+        return self::$form;
 //            foreach ($this->getDynamicSelectData() as $dyanamicData) {
 //                list($stack, $data) = $dyanamicData;
 //
@@ -215,7 +206,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
         $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'));
         if ($min > 0) {
-            $this->assertFormElementNotValid($elementHierarchy, str_pad('', $max - 1, 'x'),
+            $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
                 Validator\StringLength::TOO_SHORT);
         }
         $this->assertFormElementNotValid($elementHierarchy, str_pad('', $max + 1, 'x'), Validator\StringLength::TOO_LONG);
