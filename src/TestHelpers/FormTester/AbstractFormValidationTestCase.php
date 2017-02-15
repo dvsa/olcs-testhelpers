@@ -13,7 +13,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var string The class name of the form being tested
      */
-    protected $formName = \Olcs\Form\Model\Form\NonPi::class;
+    protected $formName;
     /**
      * @var \Common\Form\Form
      */
@@ -43,7 +43,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function getForm()
     {
         if (self::$form == null) {
-            $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+            if (class_exists('\OlcsTest\Bootstrap')) {
+                $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+            } elseif (class_exists('\CommonTest\Bootstrap')) {
+                $serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
+            } else {
+                throw new Exception('Cannot find Bootstap');
+            }
             $serviceManager->setAllowOverride(true);
 
             $serviceManager->get('FormElementManager')->setFactory(
@@ -54,6 +60,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                     return $element;
                 }
             );
+
+            if ($this->formName == null) {
+                throw new Exception('formName property is not defined');
+            }
 
             self::$form = $serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
         }
