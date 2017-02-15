@@ -23,16 +23,19 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * If you intentionally want to skip tests on an element they can be added here
      * @var array List of form elements eg (fields.numOfCows) that have been tested
      */
-    static private $testedElements = [];
+    static protected $testedElements = [];
 
     /**
-     * @var \Common\Form\Form
+     * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    static $form;
+    static $serviceManager;
 
     protected function setUp()
     {
-        $this->sut = $this->getForm();
+        // sut is not needed for the 'testMissingTest' tests, and it slows it down a lot
+        if (strpos($this->getName(), 'testMissingTest') === false) {
+            $this->sut = $this->getForm();
+        }
     }
 
     /**
@@ -42,7 +45,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function getForm()
     {
-        if (self::$form == null) {
+        if (self::$serviceManager == null) {
             if (class_exists('\OlcsTest\Bootstrap')) {
                 $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
             } elseif (class_exists('\CommonTest\Bootstrap')) {
@@ -61,14 +64,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 }
             );
 
-            if ($this->formName == null) {
-                throw new Exception('formName property is not defined');
-            }
-
-            self::$form = $serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
+            self::$serviceManager = $serviceManager;
         }
 
-        return self::$form;
+        if ($this->formName == null) {
+            throw new Exception('formName property is not defined');
+        }
+        return self::$serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
 //            foreach ($this->getDynamicSelectData() as $dyanamicData) {
 //                list($stack, $data) = $dyanamicData;
 //
