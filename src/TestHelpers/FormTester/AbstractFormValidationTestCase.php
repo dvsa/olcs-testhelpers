@@ -233,16 +233,35 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @return void
      */
-    protected function assertFormElementNumber($elementHierarchy, $min, $max)
+    protected function assertFormElementNumber($elementHierarchy, $min = 0, $max = null)
     {
         $this->assertFormElementValid($elementHierarchy, $min);
-        $this->assertFormElementValid($elementHierarchy, $max);
+        $this->assertFormElementValid($elementHierarchy, $min + 1);
+
         if ($min > 0) {
             $this->assertFormElementNotValid($elementHierarchy, $min - 1, Validator\Between::NOT_BETWEEN);
         }
-        $this->assertFormElementNotValid($elementHierarchy, $max + 1, Validator\Between::NOT_BETWEEN);
-        // @todo if min value is set then this test adds an extra validation message
-        $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\Digits::STRING_EMPTY]);
+
+        if ($max !== null) {
+            $this->assertFormElementValid($elementHierarchy, $max);
+            $this->assertFormElementNotValid($elementHierarchy, $max + 1, Validator\Between::NOT_BETWEEN);
+        }
+
+        $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\Digits::NOT_DIGITS]);
+    }
+
+    /**
+     * Assert than a form element is a checkbox input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementCheckbox($elementHierarchy)
+    {
+        $this->assertFormElementValid($elementHierarchy, 'Y');
+        $this->assertFormElementValid($elementHierarchy, 'N');
+        $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\InArray::NOT_IN_ARRAY]);
     }
 
     /**
