@@ -97,6 +97,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
+        $this->assertElementExists($elementHierarchy);
         $this->setData($elementHierarchy, $value, $context);
         $this->setValidationGroup($elementHierarchy);
 
@@ -166,6 +167,24 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert that the form element exists in the form
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     */
+    protected function assertElementExists(array $elementHierarchy)
+    {
+        $fieldset = $this->sut;
+        foreach ($elementHierarchy as $name) {
+            if (!$fieldset->has($name)) {
+                $this->fail(
+                    sprintf('Cannot find element by name "%s" in "%s"', $name, implode('.', $elementHierarchy))
+                );
+            }
+            $fieldset = $fieldset->get($name);
+        }
+    }
+
+    /**
      * Assert that a form element with a value is NOT valid
      *
      * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
@@ -181,6 +200,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $validationMessages = [$validationMessages];
         }
 
+        $this->assertElementExists($elementHierarchy);
         $this->setData($elementHierarchy, $value, $context);
         $this->setValidationGroup($elementHierarchy);
 
@@ -215,9 +235,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementText($elementHierarchy, $min, $max)
     {
-        $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
         $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'));
         if ($min > 0) {
+            $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
             $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
                 Validator\StringLength::TOO_SHORT);
         }
@@ -373,9 +393,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * @todo How do we make this the last tests that runs
-     *
      * Check that tests exists for all form elements
+     * This needs to be the last test that runs
      *
      * @dataProvider dataProviderAllElementNames
      *
