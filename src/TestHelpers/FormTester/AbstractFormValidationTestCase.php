@@ -308,6 +308,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a hidden input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementActionButton($elementHierarchy)
+    {
+        $this->assertFormElementRequired($elementHierarchy, false);
+        $this->assertFormElementAllowEmpty($elementHierarchy, true);
+        $this->assertFormElementValid($elementHierarchy, 'X');
+    }
+
+    /**
      * Assert that a form element is a number input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
