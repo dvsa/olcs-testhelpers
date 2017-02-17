@@ -3,6 +3,7 @@
 namespace Olcs\TestHelpers\FormTester;
 
 use Common\Form\Element\DynamicSelect;
+use Dvsa\Olcs\Transfer\Validators as TransferValidator;
 use Zend\Validator;
 
 /**
@@ -308,7 +309,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * Assert than a form element is a hidden input
+     * Assert than a form element is a action button input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      *
@@ -319,6 +320,32 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementRequired($elementHierarchy, false);
         $this->assertFormElementAllowEmpty($elementHierarchy, true);
         $this->assertFormElementValid($elementHierarchy, 'X');
+    }
+
+    /**
+     * Assert than a form element is a username input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementUsername($elementHierarchy)
+    {
+        $this->assertFormElementText($elementHierarchy, 2, 40);
+
+        $this->assertFormElementValid($elementHierarchy, '0123456789');
+        $this->assertFormElementValid($elementHierarchy, 'abcdefghijklmnoprstuvwxyz');
+        $this->assertFormElementValid($elementHierarchy, 'ABCDEFGHIJKLMNOPRSTUVWXYZ');
+        $this->assertFormElementValid($elementHierarchy, '#$%\'+-/=?^_.@`|~",:;<>');
+
+        $this->assertFormElementNotValid($elementHierarchy, 'a¬b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a!b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a£b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a&b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a*b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a(b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a)b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementNotValid($elementHierarchy, 'a b', TransferValidator\Username::USERNAME_INVALID);
     }
 
     /**
