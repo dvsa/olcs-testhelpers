@@ -380,6 +380,44 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is an email address
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementEmailAddress($elementHierarchy)
+    {
+        $this->assertFormElementValid($elementHierarchy, 'valid@email.com');
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@'.
+            '123456789012345678901234567890123456789012345678901234567890.com'
+        );
+        // total length greater than 254
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@'.
+            '123456789012345678901234567890123456789012345678901234567890.'.
+            '123456789012345678901234567890123456789012345678901234567890.'.
+            '123456789012345678901234567890123456789012345678901234567890.com',
+            TransferValidator\EmailAddress::ERROR_INVALID
+        );
+        // domain parts max greate than 63 chars
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'.
+            '@1234567890123456789012345678901234567890123456789012345678901234.com',
+            TransferValidator\EmailAddress::INVALID_FORMAT
+        );
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            '1234567890123456789012345678901234567890123456789012345678901',
+            TransferValidator\EmailAddress::INVALID_FORMAT
+        );
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
