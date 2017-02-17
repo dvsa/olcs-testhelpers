@@ -163,8 +163,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         foreach (array_reverse($elementHierarchy) as $name) {
             $array = [$name => $array];
         }
-
-        $this->sut->setData(array_merge($context, $array));
+        $this->sut->setData(array_merge_recursive($context, $array));
     }
 
     /**
@@ -221,7 +220,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      * @param array        $context            Form data context required to test the validation
      */
-    protected function assertFormElementNotValid(array $elementHierarchy, $value, $validationMessages, $context = [])
+    protected function assertFormElementNotValid(array $elementHierarchy, $value, $validationMessages, array $context = [])
     {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
@@ -259,27 +258,29 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      * @param int   $min              Minimum allowed string length
      * @param int   $max              Maximum allowed string length
+     * @param array $context          Any form context required for this validation
      *
      * @return void
      */
-    protected function assertFormElementText($elementHierarchy, $min = 0, $max = null)
+    protected function assertFormElementText($elementHierarchy, $min = 0, $max = null, array $context = [])
     {
         if ($min > 0) {
-            $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
+            $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'), $context);
         }
         if ($min > 1) {
             $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
-                Validator\StringLength::TOO_SHORT);
+                Validator\StringLength::TOO_SHORT, $context);
         } else {
-            $this->assertFormElementValid($elementHierarchy, 'x');
+            $this->assertFormElementValid($elementHierarchy, 'x', $context);
         }
 
         if ($max !== null) {
-            $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'));
+            $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'), $context);
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 str_pad('', $max + 1, 'x'),
-                Validator\StringLength::TOO_LONG
+                Validator\StringLength::TOO_LONG,
+                $context
             );
         }
     }
@@ -475,12 +476,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @return void
      */
-    protected function assertFormElementAllowEmpty($elementHierarchy, $allowEmpty)
+    protected function assertFormElementAllowEmpty($elementHierarchy, $allowEmpty, $context = [])
     {
         if ($allowEmpty === true) {
-            $this->assertFormElementValid($elementHierarchy, '');
+            $this->assertFormElementValid($elementHierarchy, '', $context);
         } else {
-            $this->assertFormElementNotValid($elementHierarchy, '', 'isEmpty');
+            $this->assertFormElementNotValid($elementHierarchy, '', 'isEmpty', $context);
         }
     }
 
