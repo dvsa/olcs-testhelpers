@@ -174,15 +174,43 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertElementExists(array $elementHierarchy)
     {
-        $fieldset = $this->sut;
+        try {
+            $this->getFormElement($elementHierarchy);
+        } catch (\Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * Get the form element
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return \Zend\Form\Element
+     */
+    protected function getFormElement(array $elementHierarchy)
+    {
+        $element = $this->sut;
         foreach ($elementHierarchy as $name) {
-            if (!$fieldset->has($name)) {
-                $this->fail(
+            if (!$element->has($name)) {
+                throw new Exception(
                     sprintf('Cannot find element by name "%s" in "%s"', $name, implode('.', $elementHierarchy))
                 );
             }
-            $fieldset = $fieldset->get($name);
+            $element = $element->get($name);
         }
+        return $element;
+    }
+
+    /**
+     * Assert the type of a form element
+     *
+     * @param array  $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param string $type             Class name of the type
+     */
+    protected function assertFormElementType(array $elementHierarchy, $type)
+    {
+        $this->assertInstanceOf($type, $this->getFormElement($elementHierarchy));
     }
 
     /**
@@ -238,6 +266,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         if ($min > 0) {
             $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
+        }
+        if ($min > 1) {
             $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
                 Validator\StringLength::TOO_SHORT);
         } else {
@@ -346,6 +376,21 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementNotValid($elementHierarchy, 'a(b', TransferValidator\Username::USERNAME_INVALID);
         $this->assertFormElementNotValid($elementHierarchy, 'a)b', TransferValidator\Username::USERNAME_INVALID);
         $this->assertFormElementNotValid($elementHierarchy, 'a b', TransferValidator\Username::USERNAME_INVALID);
+    }
+
+    /**
+     * Assert than a form element is a VRM
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementVrm($elementHierarchy)
+    {
+        $this->assertFormElementValid($elementHierarchy, 'XX59 GTB');
+        $this->assertFormElementValid($elementHierarchy, 'FOO1');
+        $this->assertFormElementNotValid($elementHierarchy, 'FOO', 'invalid');
+        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Custom\VehicleVrm::class);
     }
 
     /**
