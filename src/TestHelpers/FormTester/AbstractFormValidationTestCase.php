@@ -233,15 +233,24 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @return void
      */
-    protected function assertFormElementText($elementHierarchy, $min, $max)
+    protected function assertFormElementText($elementHierarchy, $min = 0, $max = null)
     {
-        $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'));
         if ($min > 0) {
             $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'));
             $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
                 Validator\StringLength::TOO_SHORT);
+        } else {
+            $this->assertFormElementValid($elementHierarchy, 'x');
         }
-        $this->assertFormElementNotValid($elementHierarchy, str_pad('', $max + 1, 'x'), Validator\StringLength::TOO_LONG);
+
+        if ($max !== null) {
+            $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'));
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                str_pad('', $max + 1, 'x'),
+                Validator\StringLength::TOO_LONG
+            );
+        }
     }
 
     /**
