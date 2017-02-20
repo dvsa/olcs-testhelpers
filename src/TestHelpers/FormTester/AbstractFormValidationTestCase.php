@@ -2,6 +2,7 @@
 
 namespace Olcs\TestHelpers\FormTester;
 
+use Common\Form\Element\DynamicRadio;
 use Common\Form\Element\DynamicSelect;
 use Dvsa\Olcs\Transfer\Validators as TransferValidator;
 use Zend\Validator;
@@ -60,6 +61,15 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 'DynamicSelect',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicSelect();
+                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    return $element;
+                }
+            );
+
+            $serviceManager->get('FormElementManager')->setFactory(
+                'DynamicRadio',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicRadio();
                     $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
                     return $element;
                 }
@@ -433,7 +443,24 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * Assert that a form element is a number input
+     * Assert that a form element is a dynamic radio
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param bool  $required         Is the form element required
+     *
+     * @return void
+     */
+    protected function assertFormElementDynamicRadio($elementHierarchy, $required = true)
+    {
+        $this->assertFormElementValid($elementHierarchy, 1);
+        $this->assertFormElementValid($elementHierarchy, '1');
+        if ($required) {
+            $this->assertFormElementNotValid($elementHierarchy, 'X', Validator\InArray::NOT_IN_ARRAY);
+        }
+    }
+
+    /**
+     * Assert that a form element is a dynamic select
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      * @param bool  $required         Is the form element required
