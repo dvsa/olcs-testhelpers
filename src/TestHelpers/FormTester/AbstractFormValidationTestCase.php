@@ -350,6 +350,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a html input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementHtml($elementHierarchy)
+    {
+        $this->assertFormElementRequired($elementHierarchy, false);
+        $this->assertFormElementAllowEmpty($elementHierarchy, true);
+        $this->assertFormElementValid($elementHierarchy, 'X');
+    }
+
+    /**
      * Assert than a form element is a action button input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
