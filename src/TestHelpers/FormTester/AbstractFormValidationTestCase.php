@@ -2,6 +2,7 @@
 
 namespace Olcs\TestHelpers\FormTester;
 
+use Common\Form\Element\DynamicMultiCheckbox;
 use Common\Form\Element\DynamicRadio;
 use Common\Form\Element\DynamicSelect;
 use Dvsa\Olcs\Transfer\Validators as TransferValidator;
@@ -70,6 +71,15 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 'DynamicRadio',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicRadio();
+                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    return $element;
+                }
+            );
+
+            $serviceManager->get('FormElementManager')->setFactory(
+                'DynamicMultiCheckbox',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicMultiCheckbox();
                     $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
                     return $element;
                 }
@@ -454,6 +464,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementValid($elementHierarchy, 'FOO1');
         $this->assertFormElementNotValid($elementHierarchy, 'FOO', 'invalid');
         $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Custom\VehicleVrm::class);
+    }
+
+    /**
+     * Assert that a form element is a dynamic multi checkbox
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param bool  $required         Is the form element required
+     *
+     * @return void
+     */
+    protected function assertFormElementDynamicMultiCheckbox($elementHierarchy, $required = true)
+    {
+        $this->assertFormElementValid($elementHierarchy, 1);
+        $this->assertFormElementValid($elementHierarchy, '1');
     }
 
     /**
