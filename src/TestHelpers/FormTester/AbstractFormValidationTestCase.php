@@ -467,6 +467,19 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a vehicle plated weight
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementVehiclePlatedWeight($elementHierarchy)
+    {
+        $this->assertFormElementNumber($elementHierarchy, 0, 999999);
+        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Custom\VehiclePlatedWeight::class);
+    }
+
+    /**
      * Assert that a form element is a dynamic multi checkbox
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
