@@ -529,6 +529,32 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert that a form element is a month select input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementMonthSelect($elementHierarchy)
+    {
+        $this->assertFormElementValid($elementHierarchy, ['month' => '2', 'year' => '1999']);
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            ['month' => 'X', 'year' => '1999'],
+            [
+                \Zend\Validator\Regex::NOT_MATCH
+            ]
+        );
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            ['month' => '3', 'year' => 'XXXX'],
+            [
+                \Zend\Validator\Regex::NOT_MATCH
+            ]
+        );
+    }
+
+    /**
      * Assert that a form element is a date input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
