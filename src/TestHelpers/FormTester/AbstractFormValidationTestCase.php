@@ -640,32 +640,48 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert whether a form element allows empty
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool  $allowEmpty       if true, form element allows empty
+     * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
+     * @param bool         $allowEmpty         if true, form element allows empty
+     * @param array        $context            Context
+     * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
      */
-    protected function assertFormElementAllowEmpty($elementHierarchy, $allowEmpty, $context = [])
-    {
+    protected function assertFormElementAllowEmpty(
+        $elementHierarchy,
+        $allowEmpty,
+        $context = [],
+        $validationMessages = null
+    ) {
         if ($allowEmpty === true) {
             $this->assertFormElementValid($elementHierarchy, '', $context);
         } else {
-            $this->assertFormElementNotValid($elementHierarchy, '', 'isEmpty', $context);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                '',
+                $validationMessages ? : Validator\NotEmpty::IS_EMPTY,
+                $context
+            );
         }
     }
 
     /**
      * Assert whether a form element is required
      *
-     * @param string $elementHierarchy Form element name
-     * @param bool $required true, form element is required
+     * @param string       $elementHierarchy   Form element name
+     * @param bool         $required           true, form element is required
+     * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
      */
-    protected function assertFormElementRequired($elementHierarchy, $required)
+    protected function assertFormElementRequired($elementHierarchy, $required, $validationMessages = null)
     {
         if ($required === true) {
-            $this->assertFormElementNotValid($elementHierarchy, null, 'isEmpty');
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                null,
+                $validationMessages ? : Validator\NotEmpty::IS_EMPTY
+            );
         } else {
             $this->assertFormElementValid($elementHierarchy, null);
         }
