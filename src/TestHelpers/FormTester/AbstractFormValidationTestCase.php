@@ -507,6 +507,19 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a company number
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementCompanyNumber($elementHierarchy)
+    {
+        $this->assertFormElementText($elementHierarchy, 1, 8);
+        $this->assertFormElementNotValid($elementHierarchy, '#', \Zend\I18n\Validator\Alnum::NOT_ALNUM);
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
