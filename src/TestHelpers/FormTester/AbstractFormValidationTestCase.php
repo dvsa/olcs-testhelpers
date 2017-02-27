@@ -493,6 +493,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a postcode search
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementPostcodeSearch($elementHierarchy)
+    {
+        // @todo Common\Form\Elements\Types\PostcodeSearch to be fixed
+        // Input "searchPostcode" must implement InputFilterInterface
+        // $this->assertFormElementText(array_merge($elementHierarchy, ['postcode']));
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
