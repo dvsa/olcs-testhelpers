@@ -308,27 +308,38 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert than a form element is a number input
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param int   $min              Minimum allowed value
-     * @param int   $max              Maximum allowed value
+     * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
+     * @param int          $min                Minimum allowed value
+     * @param int          $max                Maximum allowed value
+     * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
      */
-    protected function assertFormElementNumber($elementHierarchy, $min = 0, $max = null)
+    protected function assertFormElementNumber($elementHierarchy, $min = 0, $max = null, $validationMessages = null)
     {
         $this->assertFormElementValid($elementHierarchy, $min);
         $this->assertFormElementValid($elementHierarchy, $min + 1);
 
         if ($min > 0) {
-            $this->assertFormElementNotValid($elementHierarchy, $min - 1, Validator\Between::NOT_BETWEEN);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                $min - 1,
+                $validationMessages ? : Validator\Between::NOT_BETWEEN
+            );
         }
 
         if ($max !== null) {
             $this->assertFormElementValid($elementHierarchy, $max);
-            $this->assertFormElementNotValid($elementHierarchy, $max + 1, Validator\Between::NOT_BETWEEN);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                $max + 1,
+                $validationMessages ? : Validator\Between::NOT_BETWEEN
+            );
         }
 
-        $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\Digits::NOT_DIGITS]);
+        if ($validationMessages === null) {
+            $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\Digits::NOT_DIGITS]);
+        }
     }
 
     /**
