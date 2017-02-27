@@ -332,6 +332,32 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a float input
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param int   $min              Minimum allowed value
+     * @param int   $max              Maximum allowed value
+     *
+     * @return void
+     */
+    protected function assertFormElementFloat($elementHierarchy, $min = 0, $max = null)
+    {
+        $this->assertFormElementValid($elementHierarchy, $min);
+        $this->assertFormElementValid($elementHierarchy, $min + 0.1);
+
+        if ($min > 0) {
+            $this->assertFormElementNotValid($elementHierarchy, $min - 0.1, Validator\Between::NOT_BETWEEN);
+        }
+
+        if ($max !== null) {
+            $this->assertFormElementValid($elementHierarchy, $max);
+            $this->assertFormElementNotValid($elementHierarchy, $max + 0.1, Validator\LessThan::NOT_LESS_INCLUSIVE);
+        }
+
+        $this->assertFormElementNotValid($elementHierarchy, 'X', [\Zend\I18n\Validator\Float::NOT_FLOAT]);
+    }
+
+    /**
      * Assert than a form element is a checkbox input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
