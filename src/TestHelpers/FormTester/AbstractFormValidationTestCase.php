@@ -478,6 +478,21 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a postcode
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementPostcode($elementHierarchy)
+    {
+        $this->assertFormElementValid($elementHierarchy, 'LS9 6NF');
+        $this->assertFormElementValid($elementHierarchy, 'ls9 6nf');
+        $this->assertFormElementValid($elementHierarchy, 'ls96NF');
+        $this->assertFormElementNotValid($elementHierarchy, 'not a postcode', Validator\StringLength::TOO_LONG);
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
