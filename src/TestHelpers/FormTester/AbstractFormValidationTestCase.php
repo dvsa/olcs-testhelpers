@@ -543,6 +543,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a NoRender
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementNoRender($elementHierarchy)
+    {
+        $this->assertFormElementRequired($elementHierarchy, false);
+        $this->assertFormElementAllowEmpty($elementHierarchy, true);
+        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\InputFilters\NoRender::class);
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
