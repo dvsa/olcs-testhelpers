@@ -531,6 +531,18 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a table
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementTable($elementHierarchy)
+    {
+        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Types\Table::class);
+    }
+
+    /**
      * Assert than a form element is a VRM
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
