@@ -548,6 +548,20 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a company number type
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementCompanyNumberType($elementHierarchy)
+    {
+        $this->assertFormElementHtml(array_merge($elementHierarchy, ['description']));
+        $this->assertFormElementCompanyNumber(array_merge($elementHierarchy, ['company_number']));
+        $this->assertFormElementActionButton(array_merge($elementHierarchy, ['submit_lookup_company']));
+    }
+
+    /**
      * Assert than a form element is a table
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
