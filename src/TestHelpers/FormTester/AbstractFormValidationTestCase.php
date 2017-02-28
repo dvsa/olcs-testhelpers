@@ -504,6 +504,23 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Assert than a form element is a phone
+     *
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
+     */
+    protected function assertFormElementPhone($elementHierarchy)
+    {
+        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\InputFilters\Phone::class);
+        $this->assertFormElementValid($elementHierarchy, '0123456789');
+        $this->assertFormElementValid($elementHierarchy, '+44123456789');
+        $this->assertFormElementValid($elementHierarchy, '(0044)1234567889');
+        $this->assertFormElementValid($elementHierarchy, '0123-456789');
+        $this->assertFormElementNotValid($elementHierarchy, 'not a phone number', Validator\Regex::NOT_MATCH);
+    }
+
+    /**
      * Assert than a form element is a postcode search
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
