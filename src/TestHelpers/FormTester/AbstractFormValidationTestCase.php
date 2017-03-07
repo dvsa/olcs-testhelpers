@@ -99,10 +99,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             /** @var \Common\Form\Annotation\CustomAnnotationBuilder $c */
             $frmAnnotBuilder = self::$serviceManager->get('FormAnnotationBuilder');
 
-            return self::$forms[$this->formName] = $frmAnnotBuilder->createForm($this->formName);
+            self::$forms[$this->formName] = $frmAnnotBuilder->createForm($this->formName);
         }
 
-        return self::$forms[$this->formName];
+        return clone self::$forms[$this->formName];
     }
 
     /**
