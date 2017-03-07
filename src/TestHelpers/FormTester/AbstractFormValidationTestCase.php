@@ -6,6 +6,7 @@ use Common\Form\Element\DynamicMultiCheckbox;
 use Common\Form\Element\DynamicRadio;
 use Common\Form\Element\DynamicSelect;
 use Dvsa\Olcs\Transfer\Validators as TransferValidator;
+use Mockery as m;
 use Zend\Validator;
 
 /**
@@ -31,7 +32,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    static $serviceManager;
+    private static $serviceManager;
+
+    private static $forms = [];
 
     protected function setUp()
     {
@@ -54,7 +57,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             } elseif (class_exists('\CommonTest\Bootstrap')) {
                 $serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
             } else {
-                throw new Exception('Cannot find Bootstap');
+                throw new \Exception('Cannot find Bootstap');
             }
             $serviceManager->setAllowOverride(true);
 
@@ -89,20 +92,17 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         }
 
         if ($this->formName == null) {
-            throw new Exception('formName property is not defined');
+            throw new \Exception('formName property is not defined');
         }
-        return self::$serviceManager->get('FormAnnotationBuilder')->createForm($this->formName);
-//            foreach ($this->getDynamicSelectData() as $dyanamicData) {
-//                list($stack, $data) = $dyanamicData;
-//
-//                $element = $this->form;
-//
-//                foreach ($stack as $name) {
-//                    $element = $element->get($name);
-//                }
-//
-//                $element->setValueOptions($data);
-//            }
+
+        if (!isset(self::$forms[$this->formName])) {
+            /** @var \Common\Form\Annotation\CustomAnnotationBuilder $c */
+            $frmAnnotBuilder = self::$serviceManager->get('FormAnnotationBuilder');
+
+            self::$forms[$this->formName] = $frmAnnotBuilder->createForm($this->formName);
+        }
+
+        return clone self::$forms[$this->formName];
     }
 
     /**
@@ -212,7 +212,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $element = $this->sut;
         foreach ($elementHierarchy as $name) {
             if (!$element->has($name)) {
-                throw new Exception(
+                throw new \Exception(
                     sprintf('Cannot find element by name "%s" in "%s"', $name, implode('.', $elementHierarchy))
                 );
             }
