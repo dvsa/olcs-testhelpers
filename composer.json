@@ -7,7 +7,7 @@
             "packagist": false
         },
         {
-            "url": "http://satis.inf.mgt.mtpdvsa",
+            "url": "http://devrepo.shd.ci.nonprod.dvsa.aws",
             "type": "composer"
         }
     ],
