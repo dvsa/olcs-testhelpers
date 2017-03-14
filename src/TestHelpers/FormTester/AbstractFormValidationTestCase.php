@@ -5,16 +5,9 @@ namespace Olcs\TestHelpers\FormTester;
 use Common\Form\Element\DynamicMultiCheckbox;
 use Common\Form\Element\DynamicRadio;
 use Common\Form\Element\DynamicSelect;
-use Common\Service\Cqrs\Response;
-use Dvsa\Olcs\Transfer\Query\LoggerOmitResponseInterface;
-use Dvsa\Olcs\Transfer\Query\QueryContainer;
-use Dvsa\Olcs\Transfer\Query\QueryContainerInterface;
 use Dvsa\Olcs\Transfer\Validators as TransferValidator;
 use Mockery as m;
-use Zend\Mvc\Router\RouteInterface;
 use Zend\Validator;
-use Zend\Http\Response\Stream;
-use Zend\ServiceManager\ServiceManager;
 
 /**
  * Class AbstractFormValidationTest
@@ -87,16 +80,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 }
             );
 
-            $serviceManager->get('FormElementManager')->setFactory(
-                'DynamicMultiCheckbox',
+            $serviceManager->setFactory('Common\Form\Element\DynamicMultiCheckbox',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicMultiCheckbox();
                     $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
                     return $element;
                 }
             );
-
-            $serviceManager = $this->mockServicesForDynamicMultiCheckBox($serviceManager);
 
             self::$serviceManager = $serviceManager;
         }
@@ -113,49 +103,6 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         }
 
         return clone self::$forms[$this->formName];
-    }
-
-    /**
-     * This mockery is used for the dynamic multi checkbox.
-     * When a category is selected, a query is made to populate the
-     * values of the checkbox list.  We need to make sure we have
-     * sufficient mocks in place for this process.
-     * As an additional note; ZF2.2+ has a default validator of in_array for
-     * multi checkbox/select box.  Set the disable_inarray_validator to true.
-     *
-     * @param ServiceManager $serviceManager Service Manager used for tests
-     *
-     * @return ServiceManager
-     */
-    private function mockServicesForDynamicMultiCheckBox(ServiceManager $serviceManager)
-    {
-        $transferAnnotationBuilder = m::mock();
-        $transferAnnotationBuilder->shouldReceive('createQuery')->andReturn(true);
-        $serviceManager->setService('TransferAnnotationBuilder', $transferAnnotationBuilder);
-
-        $queryContainer = new QueryContainer();
-        $httpResponse = new Stream();
-        $httpResponse->setStatusCode(200);
-        $httpResponse->setContent(json_encode([ 1 => 100, 2 => 200 ]));
-
-        $response = new Response($httpResponse);
-
-        $apiRouter = m::mock();
-        $apiRouter->shouldReceive('createQuery')->andReturn($queryContainer);
-        $serviceManager->setService('ApiRouter', $apiRouter);
-
-        $mockLogProcessor = m::mock();
-        $mockLogProcessor->shouldReceive('get')->with(\Olcs\Logging\Log\Processor\RequestId::class)->andReturn(
-            m::mock()->shouldReceive('getIdentifier')->with()->andReturn('IDENT1')->getMock()
-        );
-        $serviceManager->setService('LogProcessorManager', $mockLogProcessor);
-
-        $queryService = m::mock();
-        $queryService->shouldReceive('send')->with([$queryContainer])->andReturn($response);
-
-        $serviceManager->setService('QueryService', $queryService);
-
-        return $serviceManager;
     }
 
     /**
