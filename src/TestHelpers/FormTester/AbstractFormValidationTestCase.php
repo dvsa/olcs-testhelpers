@@ -18,6 +18,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @var string The class name of the form being tested
      */
     protected $formName;
+
     /**
      * @var \Common\Form\Form
      */
@@ -34,6 +35,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     private static $serviceManager;
 
+    /**
+     * @var array
+     */
     private static $forms = [];
 
     protected function setUp()
@@ -66,7 +70,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 'DynamicSelect',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicSelect();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    $element->setValueOptions([
+                        '1' => 'one',
+                        '2' => 'two',
+                        '3' => 'three',
+                    ]);
                     return $element;
                 }
             );
@@ -75,7 +83,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 'DynamicRadio',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicRadio();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    $element->setValueOptions([
+                        '1' => 'one',
+                        '2' => 'two',
+                        '3' => 'three',
+                    ]);
                     return $element;
                 }
             );
@@ -83,7 +95,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $serviceManager->setFactory('Common\Form\Element\DynamicMultiCheckbox',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicMultiCheckbox();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                    $element->setValueOptions([
+                        '1' => 'one',
+                        '2' => 'two',
+                        '3' => 'three',
+                    ]);
                     return $element;
                 }
             );
@@ -95,7 +111,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             throw new \Exception('formName property is not defined');
         }
 
-        if (!isset(self::$forms[$this->formName])) {
+        if (! isset(self::$forms[$this->formName])) {
             /** @var \Common\Form\Annotation\CustomAnnotationBuilder $c */
             $frmAnnotBuilder = self::$serviceManager->get('FormAnnotationBuilder');
 
@@ -109,13 +125,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element with a value is valid
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param mixed  $value           The value to be tested in the form element
-     * @param array  $context         Form data context required to test the validation
+     * @param mixed $value The value to be tested in the form element
+     * @param array $context Form data context required to test the validation
      *
      * @return void
      */
-    protected function assertFormElementValid(array $elementHierarchy, $value, array $context = [])
-    {
+    protected function assertFormElementValid(
+        array $elementHierarchy,
+        $value,
+        array $context = []
+    ) {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
         $this->assertElementExists($elementHierarchy);
@@ -174,8 +193,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Set the form data
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param mixed $value            Form element (being tested) value
-     * @param array  $context         Form data context required to test the validation
+     * @param mixed $value Form element (being tested) value
+     * @param array $context Form data context required to test the validation
      */
     protected function setData(array $elementHierarchy, $value, $context = [])
     {
@@ -211,9 +230,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         $element = $this->sut;
         foreach ($elementHierarchy as $name) {
-            if (!$element->has($name)) {
+            if (! $element->has($name)) {
                 throw new \Exception(
-                    sprintf('Cannot find element by name "%s" in "%s"', $name, implode('.', $elementHierarchy))
+                    sprintf('Cannot find element by name "%s" in "%s"',
+                    $name,
+                    implode('.', $elementHierarchy))
                 );
             }
             $element = $element->get($name);
@@ -224,27 +245,34 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert the type of a form element
      *
-     * @param array  $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param string $type             Class name of the type
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param string $type Class name of the type
      */
     protected function assertFormElementType(array $elementHierarchy, $type)
     {
-        $this->assertInstanceOf($type, $this->getFormElement($elementHierarchy));
+        $this->assertInstanceOf(
+            $type,
+            $this->getFormElement($elementHierarchy)
+        );
     }
 
     /**
      * Assert that a form element with a value is NOT valid
      *
-     * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
-     * @param mixed        $value              The value to be tested in the form element
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param mixed $value The value to be tested in the form element
      * @param string|array $validationMessages A single or an array of expected validation messages keys
-     * @param array        $context            Form data context required to test the validation
+     * @param array $context Form data context required to test the validation
      */
-    protected function assertFormElementNotValid(array $elementHierarchy, $value, $validationMessages, array $context = [])
-    {
+    protected function assertFormElementNotValid(
+        array $elementHierarchy,
+        $value,
+        $validationMessages,
+        array $context = []
+    ) {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
-        if (!is_array($validationMessages)) {
+        if (! is_array($validationMessages)) {
             $validationMessages = [$validationMessages];
         }
 
@@ -276,26 +304,39 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert than a form element is a text input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param int   $min              Minimum allowed string length
-     * @param int   $max              Maximum allowed string length
-     * @param array $context          Any form context required for this validation
+     * @param int $min Minimum allowed string length
+     * @param int $max Maximum allowed string length
+     * @param array $context Any form context required for this validation
      *
      * @return void
      */
-    protected function assertFormElementText($elementHierarchy, $min = 0, $max = null, array $context = [])
-    {
+    protected function assertFormElementText(
+        $elementHierarchy,
+        $min = 0,
+        $max = null,
+        array $context = []
+    ) {
         if ($min > 0) {
-            $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'), $context);
+            $this->assertFormElementValid(
+                $elementHierarchy,
+                str_pad('', $min, 'x'),
+                $context
+            );
         }
         if ($min > 1) {
-            $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
-                Validator\StringLength::TOO_SHORT, $context);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                str_pad('', $min - 1, 'x'),
+                Validator\StringLength::TOO_SHORT,
+                $context
+            );
         } else {
             $this->assertFormElementValid($elementHierarchy, 'x', $context);
         }
 
         if ($max !== null) {
-            $this->assertFormElementValid($elementHierarchy, str_pad('', $max, 'x'), $context);
+            $this->assertFormElementValid($elementHierarchy,
+                str_pad('', $max, 'x'), $context);
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 str_pad('', $max + 1, 'x'),
@@ -308,15 +349,19 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert than a form element is a number input
      *
-     * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
-     * @param int          $min                Minimum allowed value
-     * @param int          $max                Maximum allowed value
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param int $min Minimum allowed value
+     * @param int $max Maximum allowed value
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
      */
-    protected function assertFormElementNumber($elementHierarchy, $min = 0, $max = null, $validationMessages = null)
-    {
+    protected function assertFormElementNumber(
+        $elementHierarchy,
+        $min = 0,
+        $max = null,
+        $validationMessages = null
+    ) {
         $this->assertFormElementValid($elementHierarchy, $min);
         $this->assertFormElementValid($elementHierarchy, $min + 1);
 
@@ -324,7 +369,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 $min - 1,
-                $validationMessages ? : Validator\Between::NOT_BETWEEN
+                $validationMessages ?: Validator\Between::NOT_BETWEEN
             );
         }
 
@@ -333,12 +378,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 $max + 1,
-                $validationMessages ? : Validator\Between::NOT_BETWEEN
+                $validationMessages ?: Validator\Between::NOT_BETWEEN
             );
         }
 
         if ($validationMessages === null) {
-            $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\Digits::NOT_DIGITS]);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                'X',
+                [Validator\Digits::NOT_DIGITS]
+            );
         }
     }
 
@@ -346,26 +395,41 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert than a form element is a float input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param int   $min              Minimum allowed value
-     * @param int   $max              Maximum allowed value
+     * @param int $min Minimum allowed value
+     * @param int $max Maximum allowed value
      *
      * @return void
      */
-    protected function assertFormElementFloat($elementHierarchy, $min = 0, $max = null)
-    {
+    protected function assertFormElementFloat(
+        $elementHierarchy,
+        $min = 0,
+        $max = null
+    ) {
         $this->assertFormElementValid($elementHierarchy, $min);
         $this->assertFormElementValid($elementHierarchy, $min + 0.1);
 
         if ($min > 0) {
-            $this->assertFormElementNotValid($elementHierarchy, $min - 0.1, Validator\Between::NOT_BETWEEN);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                $min - 0.1,
+                Validator\Between::NOT_BETWEEN
+            );
         }
 
         if ($max !== null) {
             $this->assertFormElementValid($elementHierarchy, $max);
-            $this->assertFormElementNotValid($elementHierarchy, $max + 0.1, Validator\LessThan::NOT_LESS_INCLUSIVE);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                $max + 0.1,
+                Validator\LessThan::NOT_LESS_INCLUSIVE
+            );
         }
 
-        $this->assertFormElementNotValid($elementHierarchy, 'X', [\Zend\I18n\Validator\Float::NOT_FLOAT]);
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'X',
+            [\Zend\I18n\Validator\Float::NOT_FLOAT]
+        );
     }
 
     /**
@@ -379,7 +443,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         $this->assertFormElementValid($elementHierarchy, 'Y');
         $this->assertFormElementValid($elementHierarchy, 'N');
-        $this->assertFormElementNotValid($elementHierarchy, 'X', [Validator\InArray::NOT_IN_ARRAY]);
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'X',
+            [Validator\InArray::NOT_IN_ARRAY]
+        );
     }
 
     /**
@@ -436,18 +505,69 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementText($elementHierarchy, 2, 40);
 
         $this->assertFormElementValid($elementHierarchy, '0123456789');
-        $this->assertFormElementValid($elementHierarchy, 'abcdefghijklmnoprstuvwxyz');
-        $this->assertFormElementValid($elementHierarchy, 'ABCDEFGHIJKLMNOPRSTUVWXYZ');
-        $this->assertFormElementValid($elementHierarchy, '#$%\'+-/=?^_.@`|~",:;<>');
 
-        $this->assertFormElementNotValid($elementHierarchy, 'a¬b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a!b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a£b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a&b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a*b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a(b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a)b', TransferValidator\Username::USERNAME_INVALID);
-        $this->assertFormElementNotValid($elementHierarchy, 'a b', TransferValidator\Username::USERNAME_INVALID);
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            'abcdefghijklmnoprstuvwxyz'
+        );
+
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            'ABCDEFGHIJKLMNOPRSTUVWXYZ'
+        );
+
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            '#$%\'+-/=?^_.@`|~",:;<>'
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a¬b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a!b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a£b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a&b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a*b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a(b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a)b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'a b',
+            TransferValidator\Username::USERNAME_INVALID
+        );
     }
 
     /**
@@ -460,27 +580,31 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function assertFormElementEmailAddress($elementHierarchy)
     {
         $this->assertFormElementValid($elementHierarchy, 'valid@email.com');
+
         $this->assertFormElementValid(
             $elementHierarchy,
-            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@'.
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@' .
             '123456789012345678901234567890123456789012345678901234567890.com'
         );
+
         // total length greater than 254
         $this->assertFormElementNotValid(
             $elementHierarchy,
-            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@'.
-            '123456789012345678901234567890123456789012345678901234567890.'.
-            '123456789012345678901234567890123456789012345678901234567890.'.
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@' .
+            '123456789012345678901234567890123456789012345678901234567890.' .
+            '123456789012345678901234567890123456789012345678901234567890.' .
             '123456789012345678901234567890123456789012345678901234567890.com',
             TransferValidator\EmailAddress::ERROR_INVALID
         );
+
         // domain parts max greate than 63 chars
         $this->assertFormElementNotValid(
             $elementHierarchy,
-            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'.
+            '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890' .
             '@1234567890123456789012345678901234567890123456789012345678901234.com',
             TransferValidator\EmailAddress::INVALID_FORMAT
         );
+
         $this->assertFormElementNotValid(
             $elementHierarchy,
             '1234567890123456789012345678901234567890123456789012345678901',
@@ -500,7 +624,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementValid($elementHierarchy, 'LS9 6NF');
         $this->assertFormElementValid($elementHierarchy, 'ls9 6nf');
         $this->assertFormElementValid($elementHierarchy, 'ls96NF');
-        $this->assertFormElementNotValid($elementHierarchy, 'not a postcode', Validator\StringLength::TOO_LONG);
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'not a postcode',
+            Validator\StringLength::TOO_LONG
+        );
     }
 
     /**
@@ -512,12 +641,21 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementPhone($elementHierarchy)
     {
-        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\InputFilters\Phone::class);
+        $this->assertFormElementType(
+            $elementHierarchy,
+            \Common\Form\Elements\InputFilters\Phone::class
+        );
+
         $this->assertFormElementValid($elementHierarchy, '0123456789');
         $this->assertFormElementValid($elementHierarchy, '+44123456789');
         $this->assertFormElementValid($elementHierarchy, '(0044)1234567889');
         $this->assertFormElementValid($elementHierarchy, '0123-456789');
-        $this->assertFormElementNotValid($elementHierarchy, 'not a phone number', Validator\Regex::NOT_MATCH);
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            'not a phone number',
+            Validator\Regex::NOT_MATCH
+        );
     }
 
     /**
@@ -559,7 +697,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function assertFormElementCompanyNumber($elementHierarchy)
     {
         $this->assertFormElementText($elementHierarchy, 1, 8);
-        $this->assertFormElementNotValid($elementHierarchy, '#', \Zend\I18n\Validator\Alnum::NOT_ALNUM);
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            '#',
+            \Zend\I18n\Validator\Alnum::NOT_ALNUM
+        );
     }
 
     /**
@@ -571,9 +713,26 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementCompanyNumberType($elementHierarchy)
     {
-        $this->assertFormElementHtml(array_merge($elementHierarchy, ['description']));
-        $this->assertFormElementCompanyNumber(array_merge($elementHierarchy, ['company_number']));
-        $this->assertFormElementActionButton(array_merge($elementHierarchy, ['submit_lookup_company']));
+        $this->assertFormElementHtml(
+            array_merge(
+                $elementHierarchy,
+                ['description']
+            )
+        );
+
+        $this->assertFormElementCompanyNumber(
+            array_merge(
+                $elementHierarchy,
+                ['company_number']
+            )
+        );
+
+        $this->assertFormElementActionButton(
+            array_merge(
+                $elementHierarchy,
+                ['submit_lookup_company']
+            )
+        );
     }
 
     /**
@@ -585,7 +744,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementTable($elementHierarchy)
     {
-        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Types\Table::class);
+        $this->assertFormElementType(
+            $elementHierarchy,
+            \Common\Form\Elements\Types\Table::class
+        );
     }
 
     /**
@@ -599,7 +761,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         $this->assertFormElementRequired($elementHierarchy, false);
         $this->assertFormElementAllowEmpty($elementHierarchy, true);
-        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\InputFilters\NoRender::class);
+        $this->assertFormElementType(
+            $elementHierarchy,
+            \Common\Form\Elements\InputFilters\NoRender::class
+        );
     }
 
     /**
@@ -614,7 +779,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $this->assertFormElementValid($elementHierarchy, 'XX59 GTB');
         $this->assertFormElementValid($elementHierarchy, 'FOO1');
         $this->assertFormElementNotValid($elementHierarchy, 'FOO', 'invalid');
-        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Custom\VehicleVrm::class);
+        $this->assertFormElementType(
+            $elementHierarchy,
+            \Common\Form\Elements\Custom\VehicleVrm::class
+        );
     }
 
     /**
@@ -627,19 +795,24 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function assertFormElementVehiclePlatedWeight($elementHierarchy)
     {
         $this->assertFormElementNumber($elementHierarchy, 0, 999999);
-        $this->assertFormElementType($elementHierarchy, \Common\Form\Elements\Custom\VehiclePlatedWeight::class);
+        $this->assertFormElementType(
+            $elementHierarchy,
+            \Common\Form\Elements\Custom\VehiclePlatedWeight::class
+        );
     }
 
     /**
      * Assert that a form element is a dynamic multi checkbox
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool  $required         Is the form element required
+     * @param bool $required Is the form element required
      *
      * @return void
      */
-    protected function assertFormElementDynamicMultiCheckbox($elementHierarchy, $required = true)
-    {
+    protected function assertFormElementDynamicMultiCheckbox(
+        $elementHierarchy,
+        $required = true
+    ) {
         $this->assertFormElementValid($elementHierarchy, 1);
         $this->assertFormElementValid($elementHierarchy, '1');
     }
@@ -648,16 +821,22 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element is a dynamic radio
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool  $required         Is the form element required
+     * @param bool $required Is the form element required
      *
      * @return void
      */
-    protected function assertFormElementDynamicRadio($elementHierarchy, $required = true)
-    {
+    protected function assertFormElementDynamicRadio(
+        $elementHierarchy,
+        $required = true
+    ) {
         $this->assertFormElementValid($elementHierarchy, 1);
         $this->assertFormElementValid($elementHierarchy, '1');
         if ($required) {
-            $this->assertFormElementNotValid($elementHierarchy, 'X', Validator\InArray::NOT_IN_ARRAY);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                'X',
+                Validator\InArray::NOT_IN_ARRAY
+            );
         }
     }
 
@@ -665,12 +844,14 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element is a dynamic select
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool  $required         Is the form element required
+     * @param bool $required Is the form element required
      *
      * @return void
      */
-    protected function assertFormElementDynamicSelect($elementHierarchy, $required = true)
-    {
+    protected function assertFormElementDynamicSelect(
+        $elementHierarchy,
+        $required = true
+    ) {
         $this->assertFormElementValid($elementHierarchy, 1);
         $this->assertFormElementValid($elementHierarchy, '1');
         if ($required) {
@@ -688,19 +869,24 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementMonthSelect($elementHierarchy)
     {
-        $this->assertFormElementValid($elementHierarchy, ['month' => '2', 'year' => '1999']);
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            ['month' => '2', 'year' => '1999']
+        );
+
         $this->assertFormElementNotValid(
             $elementHierarchy,
             ['month' => 'X', 'year' => '1999'],
             [
-                \Zend\Validator\Regex::NOT_MATCH
+                \Zend\Validator\Regex::NOT_MATCH,
             ]
         );
+
         $this->assertFormElementNotValid(
             $elementHierarchy,
             ['month' => '3', 'year' => 'XXXX'],
             [
-                \Zend\Validator\Regex::NOT_MATCH
+                \Zend\Validator\Regex::NOT_MATCH,
             ]
         );
     }
@@ -716,19 +902,22 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         $errorMessages = [
             \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-            \Zend\Validator\Date::INVALID_DATE
+            \Zend\Validator\Date::INVALID_DATE,
         ];
 
-        $this->assertFormElementValid($elementHierarchy, ['day' => 1, 'month' => '2', 'year' => 1999]);
-        $this->assertFormElementNotValid($elementHierarchy, ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
-        $this->assertFormElementNotValid($elementHierarchy, ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
+        $this->assertFormElementValid($elementHierarchy,
+            ['day' => 1, 'month' => '2', 'year' => 1999]);
+        $this->assertFormElementNotValid($elementHierarchy,
+            ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
+        $this->assertFormElementNotValid($elementHierarchy,
+            ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
         $this->assertFormElementNotValid(
             $elementHierarchy,
             ['day' => 1, 'month' => 3, 'year' => 'XXXX'],
             [
                 \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
                 \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
-                Validator\Date::INVALID_DATE
+                Validator\Date::INVALID_DATE,
             ]
         );
     }
@@ -765,9 +954,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert whether a form element allows empty
      *
-     * @param array        $elementHierarchy   Form element name eg ['fields','numOfCows']
-     * @param bool         $allowEmpty         if true, form element allows empty
-     * @param array        $context            Context
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param bool $allowEmpty if true, form element allows empty
+     * @param array $context Context
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
@@ -784,7 +973,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 '',
-                $validationMessages ? : Validator\NotEmpty::IS_EMPTY,
+                $validationMessages ?: Validator\NotEmpty::IS_EMPTY,
                 $context
             );
         }
@@ -793,19 +982,22 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert whether a form element is required
      *
-     * @param string       $elementHierarchy   Form element name
-     * @param bool         $required           true, form element is required
+     * @param string $elementHierarchy Form element name
+     * @param bool $required true, form element is required
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
      */
-    protected function assertFormElementRequired($elementHierarchy, $required, $validationMessages = null)
-    {
+    protected function assertFormElementRequired(
+        $elementHierarchy,
+        $required,
+        $validationMessages = null
+    ) {
         if ($required === true) {
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 null,
-                $validationMessages ? : Validator\NotEmpty::IS_EMPTY
+                $validationMessages ?: Validator\NotEmpty::IS_EMPTY
             );
         } else {
             $this->assertFormElementValid($elementHierarchy, null);
@@ -822,8 +1014,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     public function testMissingTest($elementName)
     {
-        if (!array_key_exists($elementName, self::$testedElements)) {
-            $this->markTestIncomplete(sprintf('"%s" form element not tested', $elementName));
+        if (! array_key_exists($elementName, self::$testedElements)) {
+            $this->markTestIncomplete(sprintf('"%s" form element not tested',
+                $elementName));
         }
     }
 
@@ -835,9 +1028,11 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     public function dataProviderAllElementNames()
     {
         $elementList = $this->getElementList($this->getForm());
+
         foreach ($elementList as &$elementName) {
             $elementName = [$elementName];
         }
+
         return $elementList;
     }
 
@@ -845,20 +1040,31 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Get a list of all form elements
      *
      * @param \Zend\Form\Fieldset $fieldsset
-     * @param string              $prefix
+     * @param string $prefix
      *
      * @return array eg ['fields.numOfCows', 'fields.numOfDogs']
      */
-    private function getElementList(\Zend\Form\Fieldset $fieldsset, $prefix = '')
-    {
+    private function getElementList(
+        \Zend\Form\Fieldset $fieldsset,
+        $prefix = ''
+    ) {
         $elementList = [];
+
         /** @var \Zend\Form\Element $element */
         foreach ($fieldsset->getFieldsets() as $childFieldSet) {
-            $elementList = array_merge($elementList, $this->getElementList($childFieldSet, $prefix . $childFieldSet->getName() .'.'));
+            $elementList = array_merge(
+                $elementList,
+                $this->getElementList(
+                    $childFieldSet,
+                    $prefix . $childFieldSet->getName() . '.'
+                )
+            );
         }
+
         foreach ($fieldsset->getElements() as $element) {
             $elementList[] = $prefix . $element->getName();
         }
+
         return $elementList;
     }
 }
