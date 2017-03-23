@@ -722,29 +722,65 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element is a date time input
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     *
+     * @param bool|false $required Is this input required?
+
      * @return void
      */
-    protected function assertFormElementDateTime($elementHierarchy)
+    protected function assertFormElementDateTime(array $elementHierarchy, $required = true)
     {
-        // @todo Needs to create this method, similar to this:
-//        $errorMessages = [
-//            \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-//            \Zend\Validator\Date::INVALID_DATE
-//        ];
-//
-//        $this->assertFormElementValid($elementHierarchy, ['day' => 1, 'month' => '2', 'year' => 1999]);
-//        $this->assertFormElementNotValid($elementHierarchy, ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
-//        $this->assertFormElementNotValid($elementHierarchy, ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
-//        $this->assertFormElementNotValid(
-//            $elementHierarchy,
-//            ['day' => 1, 'month' => 3, 'year' => 'XXXX'],
-//            [
-//                \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-//                \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
-//                Validator\Date::INVALID_DATE
-//            ]
-//        );
+        $this->assertFormElementRequired($elementHierarchy, $required);
+
+        $validationMessages = [
+            \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
+            \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
+            Validator\Date::INVALID_DATE,
+        ];
+
+        // String in values
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            [
+                'year' => 'XXXX',
+                'month' => 'XX',
+                'day' => 'XX',
+                'hour' => 'XX',
+                'minute' => 'XX',
+                'second' => 'XX',
+            ],
+            $validationMessages
+        );
+
+        $validationMessages = [
+            Validator\Date::INVALID_DATE
+        ];
+
+        // Invalid date
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            [
+                'year' => 2000,
+                'month' => 15,
+                'day' => 35,
+                'hour' => 27,
+                'minute' => 100,
+                'second' => 5000,
+            ],
+            $validationMessages
+        );
+
+        // Valid scenario
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            [
+                'year' => date('Y')+1,
+                'month' => 01,
+                'day' => 20,
+                'hour' => 10,
+                'minute' => 50,
+                'second' => 35,
+            ],
+            $validationMessages
+        );
     }
 
     /**
