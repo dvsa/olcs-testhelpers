@@ -295,7 +295,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             sprintf(
                 '"%s" form element with value "%s" error messages not as expected',
                 implode($elementHierarchy, '.'),
-                print_r($value, true))
+                print_r($value, true)
+            )
         );
     }
 
@@ -334,8 +335,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         }
 
         if ($max !== null) {
-            $this->assertFormElementValid($elementHierarchy,
-                str_pad('', $max, 'x'), $context);
+            $this->assertFormElementValid(
+                $elementHierarchy,
+                str_pad('', $max, 'x'),
+                $context
+            );
+
             $this->assertFormElementNotValid(
                 $elementHierarchy,
                 str_pad('', $max + 1, 'x'),
@@ -904,12 +909,21 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             \Zend\Validator\Date::INVALID_DATE,
         ];
 
-        $this->assertFormElementValid($elementHierarchy,
-            ['day' => 1, 'month' => '2', 'year' => 1999]);
+        $this->assertFormElementValid(
+            $elementHierarchy,
+            ['day' => 1, 'month' => '2', 'year' => 1999]
+        );
+
         $this->assertFormElementNotValid($elementHierarchy,
-            ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
+            ['day' => 'X', 'month' => '2', 'year' => 1999],
+            $errorMessages
+        );
+
         $this->assertFormElementNotValid($elementHierarchy,
-            ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
+            ['day' => '1', 'month' => 'X', 'year' => 1999],
+            $errorMessages
+        );
+
         $this->assertFormElementNotValid(
             $elementHierarchy,
             ['day' => 1, 'month' => 3, 'year' => 'XXXX'],
@@ -1014,8 +1028,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     public function testMissingTest($elementName)
     {
         if (! array_key_exists($elementName, self::$testedElements)) {
-            $this->markTestIncomplete(sprintf('"%s" form element not tested',
-                $elementName));
+            $this->markTestIncomplete(
+                sprintf('"%s" form element not tested',
+                $elementName)
+            );
         }
     }
 
