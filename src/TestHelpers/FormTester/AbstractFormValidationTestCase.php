@@ -1,5 +1,4 @@
 <?php
-
 namespace Olcs\TestHelpers\FormTester;
 
 use Common\Form\Element\DynamicMultiCheckbox;
