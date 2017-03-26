@@ -719,22 +719,56 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * Assert that a form element is a date time input
+     * Assert that a form element is a date time input.  For any complex
+     * logic such as; `endDate` with contexts - use the individual methods.
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      * @param bool|false $required Is this input required?
 
      * @return void
      */
-    protected function assertFormElementDateTime(array $elementHierarchy, $required = true)
+    protected function assertFormElementDateTime(
+        array $elementHierarchy,
+        $required = true,
+        $value = null
+    )
     {
-        $this->assertFormElementRequired($elementHierarchy, $required);
+        if ($value === null) {
+            // Date inputted will be exact time tomorrow.
+            $value = [
+                'year' => date('Y'),
+                'month' => date('m'),
+                'day' => date('j') + 1,
+                'hour' => date('h'),
+                'minute' => date('i'),
+                'second' => date('s'),
+            ];
+        }
 
-        $validationMessages = [
-            \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-            \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
-            Validator\Date::INVALID_DATE,
-        ];
+        $this->assertFormElementRequired($elementHierarchy, $required);
+        $this->assertFormElementDateTimeNotValidCheck($elementHierarchy);
+        $this->assertFormElementDateTimeValidCheck($elementHierarchy, $value);
+    }
+
+    /**
+     * To avoid duplication, you can call this method separately and
+     * pass custom validation messages
+     *
+     * @param array $elementHierarchy
+     * @param array $validationMessages
+     */
+    protected function assertFormElementDateTimeNotValidCheck(
+        array $elementHierarchy,
+        $validationMessages = []
+    )
+    {
+        if (empty($validationMessages)) {
+            $validationMessages = [
+                \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
+                \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
+                Validator\Date::INVALID_DATE,
+            ];
+        }
 
         // String in values
         $this->assertFormElementNotValid(
@@ -767,19 +801,38 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             ],
             $validationMessages
         );
+    }
+
+    /**
+     * Developer note;
+     * Value is expected to be an array with 'year', 'month', 'day', 'hour', 'minute', 'second'
+     *
+     * @param array $elementHierarchy
+     * @param null|mixed $value
+     * @param array $context
+     */
+    protected function assertFormElementDateTimeValidCheck(
+        array $elementHierarchy,
+        $value = null,
+        array $context = []
+    )
+    {
+        if ($value === null) {
+            $value = [
+                'year' => date('Y'),
+                'month' => date('m'),
+                'day' => date('j') + 1,
+                'hour' => date('h'),
+                'minute' => date('i'),
+                'second' => date('s'),
+            ];
+        }
 
         // Valid scenario
         $this->assertFormElementValid(
             $elementHierarchy,
-            [
-                'year' => date('Y')+1,
-                'month' => 01,
-                'day' => 20,
-                'hour' => 10,
-                'minute' => 50,
-                'second' => 35,
-            ],
-            $validationMessages
+            $value,
+            $context
         );
     }
 
