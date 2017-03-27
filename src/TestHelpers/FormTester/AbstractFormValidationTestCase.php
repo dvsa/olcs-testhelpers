@@ -722,17 +722,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element is a date time input.  For any complex
      * logic such as; `endDate` with contexts - use the individual methods.
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool|true $required Is this input required?  Default is 'true'
-     * @param null $value Currently the default will be tomorrow's date
+     * @param array     $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param bool|true $required         Is this input required?  Default is 'true'
+     * @param null      $value            Currently the default will be tomorrow's date
      *
      * @return void
      */
-    protected function assertFormElementDateTime(
-        array $elementHierarchy,
-        $required = true,
-        $value = null
-    )
+    protected function assertFormElementDateTime(array $elementHierarchy, $required = true, $value = null)
     {
         if ($value === null) {
             // Date inputted will be exact time tomorrow.
@@ -755,13 +751,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * To avoid duplication, you can call this method separately and
      * pass custom validation messages
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param array $elementHierarchy   Form element name eg ['fields','numOfCows']
      * @param array $validationMessages Specify if validation messages are expected to be different
+     *
+     * @return void
      */
-    protected function assertFormElementDateTimeNotValidCheck(
-        array $elementHierarchy,
-        $validationMessages = []
-    )
+    protected function assertFormElementDateTimeNotValidCheck(array $elementHierarchy, $validationMessages = [])
     {
         if (empty($validationMessages)) {
             $validationMessages = [
@@ -808,15 +803,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Developer note;
      * Value is expected to be an array with 'year', 'month', 'day', 'hour', 'minute', 'second'
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param null|mixed $value Default date is tomorrows date.  Can be changed if future not allowed
-     * @param array $context Context is normally used for startDate/endDates
+     * @param array      $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param null|mixed $value            Default date is tomorrows date.  Can be changed if future not allowed
+     * @param array      $context          Context is normally used for startDate/endDates
+     *
+     * @return void
      */
-    protected function assertFormElementDateTimeValidCheck(
-        array $elementHierarchy,
-        $value = null,
-        array $context = []
-    )
+    protected function assertFormElementDateTimeValidCheck(array $elementHierarchy, $value = null, array $context = [])
     {
         if ($value === null) {
             $value = [
@@ -830,11 +823,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         }
 
         // Valid scenario
-        $this->assertFormElementValid(
-            $elementHierarchy,
-            $value,
-            $context
-        );
+        $this->assertFormElementValid($elementHierarchy, $value, $context);
     }
 
     /**
