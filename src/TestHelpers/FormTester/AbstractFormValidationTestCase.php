@@ -723,8 +723,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * logic such as; `endDate` with contexts - use the individual methods.
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param bool|false $required Is this input required?
-
+     * @param bool|true $required Is this input required?  Default is 'true'
+     * @param null $value Currently the default will be tomorrow's date
+     *
      * @return void
      */
     protected function assertFormElementDateTime(
@@ -754,8 +755,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * To avoid duplication, you can call this method separately and
      * pass custom validation messages
      *
-     * @param array $elementHierarchy
-     * @param array $validationMessages
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param array $validationMessages Specify if validation messages are expected to be different
      */
     protected function assertFormElementDateTimeNotValidCheck(
         array $elementHierarchy,
@@ -807,9 +808,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Developer note;
      * Value is expected to be an array with 'year', 'month', 'day', 'hour', 'minute', 'second'
      *
-     * @param array $elementHierarchy
-     * @param null|mixed $value
-     * @param array $context
+     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param null|mixed $value Default date is tomorrows date.  Can be changed if future not allowed
+     * @param array $context Context is normally used for startDate/endDates
      */
     protected function assertFormElementDateTimeValidCheck(
         array $elementHierarchy,
