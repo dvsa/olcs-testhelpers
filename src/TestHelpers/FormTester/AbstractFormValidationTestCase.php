@@ -1,5 +1,4 @@
 <?php
-
 namespace Olcs\TestHelpers\FormTester;
 
 use Common\Form\Element\DynamicMultiCheckbox;
@@ -34,8 +33,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     private static $serviceManager;
 
+    /**
+     * @var array
+     */
     private static $forms = [];
 
+    /**
+     * @throws \Exception
+     *
+     * @return void
+     */
     protected function setUp()
     {
         // sut is not needed for the 'testMissingTest' tests, and it slows it down a lot
@@ -521,7 +528,10 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * Assert than a form element is a postcode search
+     * Note for developers
+     * We are not really testing here.  There is a custom validation on the
+     * frontend (mainly AJAX functionality).  For this purpose there is no real
+     * use testing case.  So we skip these searchPostcode elements.
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      *
@@ -529,9 +539,23 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function assertFormElementPostcodeSearch($elementHierarchy)
     {
-        // @todo Common\Form\Elements\Types\PostcodeSearch to be fixed
-        // Input "searchPostcode" must implement InputFilterInterface
-        // $this->assertFormElementText(array_merge($elementHierarchy, ['postcode']));
+        $searchPostcodeElements = [
+            'postcode',
+            'search',
+            'addresses',
+            'select',
+            'manual-link',
+        ];
+
+        foreach ($searchPostcodeElements as $element) {
+            $elementToSkip = array_merge(
+                $elementHierarchy, [
+                    $element,
+                ]
+            );
+
+            self::$testedElements[implode($elementToSkip, '.')] = true;
+        }
     }
 
     /**
