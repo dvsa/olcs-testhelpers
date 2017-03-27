@@ -743,32 +743,111 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
-     * Assert that a form element is a date time input
+     * Assert that a form element is a date time input.  For any complex
+     * logic such as; `endDate` with contexts - use the individual methods.
      *
-     * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param array     $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param bool|true $required         Is this input required?  Default is 'true'
+     * @param null      $value            Currently the default will be tomorrow's date
      *
      * @return void
      */
-    protected function assertFormElementDateTime($elementHierarchy)
+    protected function assertFormElementDateTime(array $elementHierarchy, $required = true, $value = null)
     {
-        // @todo Needs to create this method, similar to this:
-//        $errorMessages = [
-//            \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-//            \Zend\Validator\Date::INVALID_DATE
-//        ];
-//
-//        $this->assertFormElementValid($elementHierarchy, ['day' => 1, 'month' => '2', 'year' => 1999]);
-//        $this->assertFormElementNotValid($elementHierarchy, ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
-//        $this->assertFormElementNotValid($elementHierarchy, ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
-//        $this->assertFormElementNotValid(
-//            $elementHierarchy,
-//            ['day' => 1, 'month' => 3, 'year' => 'XXXX'],
-//            [
-//                \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
-//                \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
-//                Validator\Date::INVALID_DATE
-//            ]
-//        );
+        if ($value === null) {
+            // Date inputted will be exact time tomorrow.
+            $value = [
+                'year' => date('Y'),
+                'month' => date('m'),
+                'day' => date('j') + 1,
+                'hour' => date('h'),
+                'minute' => date('i'),
+                'second' => date('s'),
+            ];
+        }
+
+        $this->assertFormElementRequired($elementHierarchy, $required);
+        $this->assertFormElementDateTimeNotValidCheck($elementHierarchy);
+        $this->assertFormElementDateTimeValidCheck($elementHierarchy, $value);
+    }
+
+    /**
+     * To avoid duplication, you can call this method separately and
+     * pass custom validation messages
+     *
+     * @param array $elementHierarchy   Form element name eg ['fields','numOfCows']
+     * @param array $validationMessages Specify if validation messages are expected to be different
+     *
+     * @return void
+     */
+    protected function assertFormElementDateTimeNotValidCheck(array $elementHierarchy, $validationMessages = [])
+    {
+        if (empty($validationMessages)) {
+            $validationMessages = [
+                \Common\Validator\Date::DATE_ERR_CONTAINS_STRING,
+                \Common\Validator\Date::DATE_ERR_YEAR_LENGTH,
+                Validator\Date::INVALID_DATE,
+            ];
+        }
+
+        // String in values
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            [
+                'year' => 'XXXX',
+                'month' => 'XX',
+                'day' => 'XX',
+                'hour' => 'XX',
+                'minute' => 'XX',
+                'second' => 'XX',
+            ],
+            $validationMessages
+        );
+
+        $validationMessages = [
+            Validator\Date::INVALID_DATE
+        ];
+
+        // Invalid date
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            [
+                'year' => 2000,
+                'month' => 15,
+                'day' => 35,
+                'hour' => 27,
+                'minute' => 100,
+                'second' => 5000,
+            ],
+            $validationMessages
+        );
+    }
+
+    /**
+     * Developer note;
+     * Value is expected to be an array with 'year', 'month', 'day', 'hour', 'minute', 'second'
+     *
+     * @param array      $elementHierarchy Form element name eg ['fields','numOfCows']
+     * @param null|mixed $value            Default date is tomorrows date.  Can be changed if future not allowed
+     * @param array      $context          Context is normally used for startDate/endDates
+     *
+     * @return void
+     */
+    protected function assertFormElementDateTimeValidCheck(array $elementHierarchy, $value = null, array $context = [])
+    {
+        if ($value === null) {
+            $value = [
+                'year' => date('Y'),
+                'month' => date('m'),
+                'day' => date('j') + 1,
+                'hour' => date('h'),
+                'minute' => date('i'),
+                'second' => date('s'),
+            ];
+        }
+
+        // Valid scenario
+        $this->assertFormElementValid($elementHierarchy, $value, $context);
     }
 
     /**
