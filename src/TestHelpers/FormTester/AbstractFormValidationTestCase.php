@@ -755,14 +755,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function assertFormElementDateTime(array $elementHierarchy, $required = true, $value = null)
     {
         if ($value === null) {
+            $currentDate = new \DateTimeImmutable('tomorrow');
+
             // Date inputted will be exact time tomorrow.
             $value = [
-                'year' => date('Y'),
-                'month' => date('m'),
-                'day' => date('j') + 1,
-                'hour' => date('h'),
-                'minute' => date('i'),
-                'second' => date('s'),
+                'year' => $currentDate->format('Y'),
+                'month' => $currentDate->format('m'),
+                'day' => $currentDate->format('j'),
+                'hour' => $currentDate->format('h'),
+                'minute' => $currentDate->format('i'),
+                'second' => $currentDate->format('s'),
             ];
         }
 
@@ -836,13 +838,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     protected function assertFormElementDateTimeValidCheck(array $elementHierarchy, $value = null, array $context = [])
     {
         if ($value === null) {
+            $currentDate = new \DateTimeImmutable('tomorrow');
+
+            // Date inputted will be exact time tomorrow.
             $value = [
-                'year' => date('Y'),
-                'month' => date('m'),
-                'day' => date('j') + 1,
-                'hour' => date('h'),
-                'minute' => date('i'),
-                'second' => date('s'),
+                'year' => $currentDate->format('Y'),
+                'month' => $currentDate->format('m'),
+                'day' => $currentDate->format('j'),
+                'hour' => $currentDate->format('h'),
+                'minute' => $currentDate->format('i'),
+                'second' => $currentDate->format('s'),
             ];
         }
 
