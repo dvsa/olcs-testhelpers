@@ -87,7 +87,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 }
             );
 
-            $serviceManager->setFactory('Common\Form\Element\DynamicMultiCheckbox',
+            $serviceManager->setFactory(
+                'Common\Form\Element\DynamicMultiCheckbox',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicMultiCheckbox();
                     $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
@@ -98,7 +99,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             // We are doing this solely for the internal application.  This service
             // is only registered there.  So we check if the element exists first.
             if (class_exists(\Olcs\Form\Element\SubmissionSections::class)) {
-                $serviceManager->setFactory('SubmissionSections',
+                $serviceManager->setFactory(
+                    'SubmissionSections',
                     function ($serviceLocator, $name, $requestedName) {
                         $element = new \Olcs\Form\Element\SubmissionSections();
                         return $element;
