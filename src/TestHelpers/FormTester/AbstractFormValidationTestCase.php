@@ -31,7 +31,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    static protected $serviceManager;
+    private static $serviceManager;
 
     /**
      * @var array
