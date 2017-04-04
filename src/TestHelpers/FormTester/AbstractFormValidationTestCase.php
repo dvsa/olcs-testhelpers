@@ -31,7 +31,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    private static $serviceManager;
+    static protected $serviceManager;
 
     /**
      * @var array
@@ -94,6 +94,17 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                     return $element;
                 }
             );
+
+            // We are doing this solely for the internal application.  This service
+            // is only registered there.  So we check if the element exists first.
+            if (class_exists(\Olcs\Form\Element\SubmissionSections::class)) {
+                $serviceManager->setFactory('SubmissionSections',
+                    function ($serviceLocator, $name, $requestedName) {
+                        $element = new \Olcs\Form\Element\SubmissionSections();
+                        return $element;
+                    }
+                );
+            }
 
             self::$serviceManager = $serviceManager;
         }
