@@ -31,7 +31,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    private static $serviceManager;
+    protected $serviceManager;
 
     /**
      * @var array
@@ -52,59 +52,86 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * We can access service manager if we need to add a mock for certain applications
+     *
+     * @return \Zend\ServiceManager\ServiceLocatorInterface
+     */
+    protected function getServiceManager()
+    {
+        if ($this->serviceManager === null) {
+            if (class_exists('\OlcsTest\Bootstrap')) {
+                $this->serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+            } elseif (class_exists('\CommonTest\Bootstrap')) {
+                $this->serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
+            } else {
+                throw new \Exception('Cannot find Bootstap');
+            }
+
+            $this->serviceManager->setAllowOverride(true);
+
+            $this->serviceManager->get('FormElementManager')->setFactory(
+                'DynamicSelect',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicSelect();
+                    $element->setValueOptions(
+                        [
+                            '1' => 'one',
+                            '2' => 'two',
+                            '3' => 'three'
+                        ]
+                    );
+                    return $element;
+                }
+            );
+
+            $this->serviceManager->get('FormElementManager')->setFactory(
+                'DynamicRadio',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicRadio();
+                    $element->setValueOptions(
+                        [
+                            '1' => 'one',
+                            '2' => 'two',
+                            '3' => 'three'
+                        ]
+                    );
+                    return $element;
+                }
+            );
+
+            $this->serviceManager->setFactory(
+                'Common\Form\Element\DynamicMultiCheckbox',
+                function ($serviceLocator, $name, $requestedName) {
+                    $element = new DynamicMultiCheckbox();
+                    $element->setValueOptions(
+                        [
+                            '1' => 'one',
+                            '2' => 'two',
+                            '3' => 'three'
+                        ]
+                    );
+                    return $element;
+                }
+            );
+        }
+
+        return $this->serviceManager;
+    }
+
+    /**
      * Get the form object
      *
      * @return \Common\Form\Form
      */
     protected function getForm()
     {
-        if (self::$serviceManager == null) {
-            if (class_exists('\OlcsTest\Bootstrap')) {
-                $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
-            } elseif (class_exists('\CommonTest\Bootstrap')) {
-                $serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
-            } else {
-                throw new \Exception('Cannot find Bootstap');
-            }
-
-            $serviceManager->setAllowOverride(true);
-
-            $serviceManager->get('FormElementManager')->setFactory(
-                'DynamicSelect',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicSelect();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            $serviceManager->get('FormElementManager')->setFactory(
-                'DynamicRadio',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicRadio();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            $serviceManager->setFactory('Common\Form\Element\DynamicMultiCheckbox',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicMultiCheckbox();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            self::$serviceManager = $serviceManager;
-        }
-
         if ($this->formName == null) {
             throw new \Exception('formName property is not defined');
         }
 
         if (!isset(self::$forms[$this->formName])) {
             /** @var \Common\Form\Annotation\CustomAnnotationBuilder $c */
-            $frmAnnotBuilder = self::$serviceManager->get('FormAnnotationBuilder');
+            $frmAnnotBuilder = $this->getServiceManager()->get('FormAnnotationBuilder');
 
             self::$forms[$this->formName] = $frmAnnotBuilder->createForm($this->formName);
         }
@@ -247,8 +274,12 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      * @param array        $context            Form data context required to test the validation
      */
-    protected function assertFormElementNotValid(array $elementHierarchy, $value, $validationMessages, array $context = [])
-    {
+    protected function assertFormElementNotValid (
+        array $elementHierarchy,
+        $value,
+        $validationMessages,
+        array $context = []
+    ) {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
         if (!is_array($validationMessages)) {
@@ -275,7 +306,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             sprintf(
                 '"%s" form element with value "%s" error messages not as expected',
                 implode($elementHierarchy, '.'),
-                print_r($value, true))
+                print_r($value, true)
+            )
         );
     }
 
@@ -289,14 +321,22 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @return void
      */
-    protected function assertFormElementText($elementHierarchy, $min = 0, $max = null, array $context = [])
-    {
+    protected function assertFormElementText(
+        $elementHierarchy,
+        $min = 0,
+        $max = null,
+        array $context = []
+    ) {
         if ($min > 0) {
             $this->assertFormElementValid($elementHierarchy, str_pad('', $min, 'x'), $context);
         }
         if ($min > 1) {
-            $this->assertFormElementNotValid($elementHierarchy, str_pad('', $min - 1, 'x'),
-                Validator\StringLength::TOO_SHORT, $context);
+            $this->assertFormElementNotValid(
+                $elementHierarchy,
+                str_pad('', $min - 1, 'x'),
+                Validator\StringLength::TOO_SHORT,
+                $context
+            );
         } else {
             $this->assertFormElementValid($elementHierarchy, 'x', $context);
         }
@@ -678,12 +718,14 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @return void
      */
-    protected function assertFormElementDynamicSelect($elementHierarchy, $required = true)
-    {
+    protected function assertFormElementDynamicSelect(
+        $elementHierarchy,
+        $required = true
+    ) {
         $this->assertFormElementValid($elementHierarchy, 1);
         $this->assertFormElementValid($elementHierarchy, '1');
         if ($required) {
-            // @todo uncomment the following line once "prefer_form_input_filter": true has been removed from the forms
+            //uncomment the following line once "prefer_form_input_filter": true has been removed from the forms
             //$this->assertFormElementNotValid($elementHierarchy, 'X', Validator\InArray::NOT_IN_ARRAY);
         }
     }
@@ -729,8 +771,19 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         ];
 
         $this->assertFormElementValid($elementHierarchy, ['day' => 1, 'month' => '2', 'year' => 1999]);
-        $this->assertFormElementNotValid($elementHierarchy, ['day' => 'X', 'month' => '2', 'year' => 1999], $errorMessages);
-        $this->assertFormElementNotValid($elementHierarchy, ['day' => '1', 'month' => 'X', 'year' => 1999], $errorMessages);
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            ['day' => 'X', 'month' => '2', 'year' => 1999],
+            $errorMessages
+        );
+
+        $this->assertFormElementNotValid(
+            $elementHierarchy,
+            ['day' => '1', 'month' => 'X', 'year' => 1999],
+            $errorMessages
+        );
+
         $this->assertFormElementNotValid(
             $elementHierarchy,
             ['day' => 1, 'month' => 3, 'year' => 'XXXX'],
@@ -947,7 +1000,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
         $elementList = [];
         /** @var \Zend\Form\Element $element */
         foreach ($fieldsset->getFieldsets() as $childFieldSet) {
-            $elementList = array_merge($elementList, $this->getElementList($childFieldSet, $prefix . $childFieldSet->getName() .'.'));
+            $elementList = array_merge(
+                $elementList,
+                $this->getElementList(
+                    $childFieldSet,
+                    $prefix . $childFieldSet->getName() .'.'
+                )
+            );
         }
         foreach ($fieldsset->getElements() as $element) {
             $elementList[] = $prefix . $element->getName();
