@@ -31,7 +31,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
-    private static $serviceManager;
+    protected $serviceManager;
 
     /**
      * @var array
@@ -58,7 +58,48 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function getServiceManager()
     {
-        return self::$serviceManager;
+        if ($this->serviceManager !== null) {
+            return $this->serviceManager;
+        }
+
+        if (class_exists('\OlcsTest\Bootstrap')) {
+            $this->serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+        } elseif (class_exists('\CommonTest\Bootstrap')) {
+            $this->serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
+        } else {
+            throw new \Exception('Cannot find Bootstap');
+        }
+
+        $this->serviceManager->setAllowOverride(true);
+
+        $this->serviceManager->get('FormElementManager')->setFactory(
+            'DynamicSelect',
+            function ($serviceLocator, $name, $requestedName) {
+                $element = new DynamicSelect();
+                $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                return $element;
+            }
+        );
+
+        $this->serviceManager->get('FormElementManager')->setFactory(
+            'DynamicRadio',
+            function ($serviceLocator, $name, $requestedName) {
+                $element = new DynamicRadio();
+                $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                return $element;
+            }
+        );
+
+        $this->serviceManager->setFactory(
+            'Common\Form\Element\DynamicMultiCheckbox',
+            function ($serviceLocator, $name, $requestedName) {
+                $element = new DynamicMultiCheckbox();
+                $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
+                return $element;
+            }
+        );
+
+        return $this->serviceManager;
     }
 
     /**
@@ -68,64 +109,13 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      */
     protected function getForm()
     {
-        if (self::$serviceManager == null) {
-            if (class_exists('\OlcsTest\Bootstrap')) {
-                self::$serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
-            } elseif (class_exists('\CommonTest\Bootstrap')) {
-                self::$serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
-            } else {
-                throw new \Exception('Cannot find Bootstap');
-            }
-
-            self::$serviceManager->setAllowOverride(true);
-
-            self::$serviceManager->get('FormElementManager')->setFactory(
-                'DynamicSelect',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicSelect();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            self::$serviceManager->get('FormElementManager')->setFactory(
-                'DynamicRadio',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicRadio();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            self::$serviceManager->setFactory(
-                'Common\Form\Element\DynamicMultiCheckbox',
-                function ($serviceLocator, $name, $requestedName) {
-                    $element = new DynamicMultiCheckbox();
-                    $element->setValueOptions(['1' => 'one', '2' => 'two', '3' => 'three']);
-                    return $element;
-                }
-            );
-
-            // We are doing this solely for the internal application.  This service
-            // is only registered there.  So we check if the element exists first.
-            if (class_exists(\Olcs\Form\Element\SubmissionSections::class)) {
-                self::$serviceManager->setFactory(
-                    'SubmissionSections',
-                    function ($serviceLocator, $name, $requestedName) {
-                        $element = new \Olcs\Form\Element\SubmissionSections();
-                        return $element;
-                    }
-                );
-            }
-        }
-
         if ($this->formName == null) {
             throw new \Exception('formName property is not defined');
         }
 
         if (!isset(self::$forms[$this->formName])) {
             /** @var \Common\Form\Annotation\CustomAnnotationBuilder $c */
-            $frmAnnotBuilder = self::$serviceManager->get('FormAnnotationBuilder');
+            $frmAnnotBuilder = $this->getServiceManager()->get('FormAnnotationBuilder');
 
             self::$forms[$this->formName] = $frmAnnotBuilder->createForm($this->formName);
         }
