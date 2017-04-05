@@ -52,6 +52,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * We can access service manager if we need to add a mock for certain applications
+     *
+     * @return \Zend\ServiceManager\ServiceLocatorInterface
+     */
+    protected function getServiceManager()
+    {
+        return self::$serviceManager;
+    }
+
+    /**
      * Get the form object
      *
      * @return \Common\Form\Form
@@ -60,16 +70,16 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     {
         if (self::$serviceManager == null) {
             if (class_exists('\OlcsTest\Bootstrap')) {
-                $serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
+                self::$serviceManager = \OlcsTest\Bootstrap::getRealServiceManager();
             } elseif (class_exists('\CommonTest\Bootstrap')) {
-                $serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
+                self::$serviceManager = \CommonTest\Bootstrap::getRealServiceManager();
             } else {
                 throw new \Exception('Cannot find Bootstap');
             }
 
-            $serviceManager->setAllowOverride(true);
+            self::$serviceManager->setAllowOverride(true);
 
-            $serviceManager->get('FormElementManager')->setFactory(
+            self::$serviceManager->get('FormElementManager')->setFactory(
                 'DynamicSelect',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicSelect();
@@ -78,7 +88,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 }
             );
 
-            $serviceManager->get('FormElementManager')->setFactory(
+            self::$serviceManager->get('FormElementManager')->setFactory(
                 'DynamicRadio',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicRadio();
@@ -87,7 +97,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 }
             );
 
-            $serviceManager->setFactory(
+            self::$serviceManager->setFactory(
                 'Common\Form\Element\DynamicMultiCheckbox',
                 function ($serviceLocator, $name, $requestedName) {
                     $element = new DynamicMultiCheckbox();
@@ -99,7 +109,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             // We are doing this solely for the internal application.  This service
             // is only registered there.  So we check if the element exists first.
             if (class_exists(\Olcs\Form\Element\SubmissionSections::class)) {
-                $serviceManager->setFactory(
+                self::$serviceManager->setFactory(
                     'SubmissionSections',
                     function ($serviceLocator, $name, $requestedName) {
                         $element = new \Olcs\Form\Element\SubmissionSections();
@@ -107,8 +117,6 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                     }
                 );
             }
-
-            self::$serviceManager = $serviceManager;
         }
 
         if ($this->formName == null) {
