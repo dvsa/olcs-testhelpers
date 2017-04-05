@@ -40,8 +40,6 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
 
     /**
      * @throws \Exception
-     *
-     * @return void
      */
     protected function setUp()
     {
@@ -922,7 +920,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @dataProvider dataProviderAllElementNames
      *
-     * @param string $elementName Element name to test
+     * @param string|null $elementName Element name to test
      */
     public function testMissingTest($elementName)
     {
