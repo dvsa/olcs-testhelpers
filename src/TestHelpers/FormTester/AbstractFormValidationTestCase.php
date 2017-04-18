@@ -17,6 +17,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @var string The class name of the form being tested
      */
     protected $formName;
+
     /**
      * @var \Common\Form\Form
      */
@@ -939,11 +940,18 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Assert whether a form element is required
      *
+     * This method checks the value, but 'required' is about checking for the key.
+     * New method is: assertFormElementIsRequired.  You will notice some of the field validations
+     * will fail after using the new method.  In this scenario, check the requirement of the field
+     * and check for any clashes.  AllowEmpty(true) and Required(true) fields make no sense.
+     * Resource: http://stackoverflow.com/questions/7242703/zend-framework-how-to-allow-empty-field-for-form-element
+     *
      * @param string       $elementHierarchy   Form element name
      * @param bool         $required           true, form element is required
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      *
      * @return void
+     * @deprecated
      */
     protected function assertFormElementRequired($elementHierarchy, $required, $validationMessages = null)
     {
@@ -955,6 +963,40 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             );
         } else {
             $this->assertFormElementValid($elementHierarchy, null);
+        }
+    }
+
+    /**
+     * New method used apart from assertFormElementRequired()
+     * Avoid using assertFormElementRequired()
+     *
+     * @param array     $elementHierarchy           Element hierarchy as array (including fieldsets)
+     * @param bool|true $required                   true, form element is required
+     * @param array     $expectedValidationMessages A single or an array of expected validation messages keys
+     *
+     * @return void
+     */
+    protected function assertFormElementIsRequired(
+        $elementHierarchy,
+        $required = true,
+        $expectedValidationMessages = [Validator\NotEmpty::IS_EMPTY]
+    ) {
+        self::$testedElements[implode($elementHierarchy, '.')] = true;
+
+        $form = $this->getForm();
+        $elementName = $this->getFormElement($elementHierarchy)->getName();
+
+        // set no data to get the response from the Validation Groups
+        $form->setData([])->isValid();
+
+        $formErrorMessages = $this->getFormMessages($elementHierarchy);
+        $isElementInMessages = in_array($elementName, $formErrorMessages);
+
+        if ($required === true) {
+            $this->assertTrue($isElementInMessages);
+            $this->assertEquals(array_keys($formErrorMessages), $expectedValidationMessages);
+        } else {
+            $this->assertFalse($isElementInMessages);
         }
     }
 
