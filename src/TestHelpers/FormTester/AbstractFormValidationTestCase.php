@@ -983,21 +983,56 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     ) {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
-        $form = $this->getForm();
-        $elementName = $this->getFormElement($elementHierarchy)->getName();
-
         // set no data to get the response from the Validation Groups
-        $form->setData([])->isValid();
+        $this->setData($elementHierarchy, null);
+        $this->setValidationGroup($elementHierarchy);
 
-        $formErrorMessages = $this->getFormMessages($elementHierarchy);
-        $isElementInMessages = in_array($elementName, $formErrorMessages);
+        $this->sut->isValid();
+
+        $formErrorMessages = $this->sut->getMessages();
+        $elementErrorMessages = $this->getElementMessages(
+            $elementHierarchy,
+            $formErrorMessages
+        );
 
         if ($required === true) {
-            $this->assertTrue($isElementInMessages);
-            $this->assertEquals(array_keys($formErrorMessages), $expectedValidationMessages);
+            $this->assertTrue((!empty($elementErrorMessages)));
+            $this->assertEquals(
+                array_keys($elementErrorMessages),
+                $expectedValidationMessages
+            );
         } else {
-            $this->assertFalse($isElementInMessages);
+            $this->assertFalse($elementErrorMessages);
         }
+    }
+
+    /**
+     * @param array $elementHierarchy  Element and/or Fieldset hierarchy
+     * @param array $formErrorMessages Error messages from Form service
+     *
+     * @return array|false
+     */
+    private function getElementMessages($elementHierarchy, $formErrorMessages)
+    {
+        $elementOrFieldsetName = (is_array($elementHierarchy))?
+            current($elementHierarchy) : next($elementHierarchy);
+
+        if (
+            isset($formErrorMessages[$elementOrFieldsetName]) &&
+            is_array($formErrorMessages[$elementOrFieldsetName])
+        ) {
+            // are we at the end?
+            if (next($elementHierarchy) === false) {
+                return $formErrorMessages[$elementOrFieldsetName];
+            }
+
+            return $this->getElementMessages(
+                $elementHierarchy,
+                $formErrorMessages[$elementOrFieldsetName]
+            );
+        }
+
+        return false;
     }
 
     /**
