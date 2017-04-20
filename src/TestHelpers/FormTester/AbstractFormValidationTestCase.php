@@ -40,6 +40,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     private static $forms = [];
 
     /**
+     * Setup
+     *
      * @throws \Exception
      *
      * @return void
@@ -144,8 +146,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that a form element with a value is valid
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
-     * @param mixed  $value           The value to be tested in the form element
-     * @param array  $context         Form data context required to test the validation
+     * @param mixed $value            The value to be tested in the form element
+     * @param array $context          Form data context required to test the validation
      *
      * @return void
      */
@@ -190,6 +192,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Set the validation group so that ony the form element is validated
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
      */
     protected function setValidationGroup(array $elementHierarchy)
     {
@@ -210,7 +214,9 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
      * @param mixed $value            Form element (being tested) value
-     * @param array  $context         Form data context required to test the validation
+     * @param array $context          Form data context required to test the validation
+     *
+     * @return void
      */
     protected function setData(array $elementHierarchy, $value, $context = [])
     {
@@ -225,6 +231,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * Assert that the form element exists in the form
      *
      * @param array $elementHierarchy Form element name eg ['fields','numOfCows']
+     *
+     * @return void
      */
     protected function assertElementExists(array $elementHierarchy)
     {
@@ -261,6 +269,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      *
      * @param array  $elementHierarchy Form element name eg ['fields','numOfCows']
      * @param string $type             Class name of the type
+     *
+     * @return void
      */
     protected function assertFormElementType(array $elementHierarchy, $type)
     {
@@ -274,6 +284,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
      * @param mixed        $value              The value to be tested in the form element
      * @param string|array $validationMessages A single or an array of expected validation messages keys
      * @param array        $context            Form data context required to test the validation
+     *
+     * @return void
      */
     protected function assertFormElementNotValid (
         array $elementHierarchy,
@@ -983,30 +995,69 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     ) {
         self::$testedElements[implode($elementHierarchy, '.')] = true;
 
-        $form = $this->getForm();
-        $elementName = $this->getFormElement($elementHierarchy)->getName();
-
         // set no data to get the response from the Validation Groups
-        $form->setData([])->isValid();
+        $this->setData($elementHierarchy, null);
+        $this->setValidationGroup($elementHierarchy);
 
-        $formErrorMessages = $this->getFormMessages($elementHierarchy);
-        $isElementInMessages = in_array($elementName, $formErrorMessages);
+        $this->sut->isValid();
+
+        $formErrorMessages = $this->sut->getMessages();
+        $elementErrorMessages = $this->getElementMessages(
+            $elementHierarchy,
+            $formErrorMessages
+        );
 
         if ($required === true) {
-            $this->assertTrue($isElementInMessages);
-            $this->assertEquals(array_keys($formErrorMessages), $expectedValidationMessages);
+            $this->assertTrue((!empty($elementErrorMessages)));
+            $this->assertEquals(
+                array_keys($elementErrorMessages),
+                $expectedValidationMessages
+            );
         } else {
-            $this->assertFalse($isElementInMessages);
+            $this->assertFalse($elementErrorMessages);
         }
+    }
+
+    /**
+     * Get messages for specified element
+     *
+     * @param array $elementHierarchy  Element and/or Fieldset hierarchy
+     * @param array $formErrorMessages Error messages from Form service
+     *
+     * @return array|false
+     */
+    private function getElementMessages($elementHierarchy, $formErrorMessages)
+    {
+        $elementOrFieldsetName = (is_array($elementHierarchy))?
+            current($elementHierarchy) : next($elementHierarchy);
+
+        if (
+            isset($formErrorMessages[$elementOrFieldsetName]) &&
+            is_array($formErrorMessages[$elementOrFieldsetName])
+        ) {
+            // are we at the end?
+            if (next($elementHierarchy) === false) {
+                return $formErrorMessages[$elementOrFieldsetName];
+            }
+
+            return $this->getElementMessages(
+                $elementHierarchy,
+                $formErrorMessages[$elementOrFieldsetName]
+            );
+        }
+
+        return false;
     }
 
     /**
      * Check that tests exists for all form elements
      * This needs to be the last test that runs
      *
+     * @param string $elementName Element name to test
+     *
      * @dataProvider dataProviderAllElementNames
      *
-     * @param string $elementName Element name to test
+     * @return void
      */
     public function testMissingTest($elementName)
     {
@@ -1032,8 +1083,8 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     /**
      * Get a list of all form elements
      *
-     * @param \Zend\Form\Fieldset $fieldsset
-     * @param string              $prefix
+     * @param \Zend\Form\Fieldset $fieldsset Fieldset
+     * @param string              $prefix    Prefix
      *
      * @return array eg ['fields.numOfCows', 'fields.numOfDogs']
      */
