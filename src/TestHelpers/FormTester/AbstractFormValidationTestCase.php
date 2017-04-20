@@ -41,7 +41,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
 
     /**
      * Setup
-     * 
+     *
      * @throws \Exception
      *
      * @return void
