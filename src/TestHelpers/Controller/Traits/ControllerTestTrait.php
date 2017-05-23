@@ -218,6 +218,8 @@ trait ControllerTestTrait
         $response = m::mock()
             ->shouldReceive('isOk')
             ->andReturn($ok)
+            ->shouldReceive('isForbidden')
+            ->andReturn(false)
             ->shouldReceive('getResult')
             ->andReturn($result)
             ->getMock();
