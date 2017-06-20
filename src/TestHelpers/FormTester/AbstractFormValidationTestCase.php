@@ -425,7 +425,7 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
             $this->assertFormElementNotValid($elementHierarchy, $max + 0.1, Validator\LessThan::NOT_LESS_INCLUSIVE);
         }
 
-        $this->assertFormElementNotValid($elementHierarchy, 'X', [\Zend\I18n\Validator\Float::NOT_FLOAT]);
+        $this->assertFormElementNotValid($elementHierarchy, 'X', [\Zend\I18n\Validator\IsFloat::NOT_FLOAT]);
     }
 
     /**
