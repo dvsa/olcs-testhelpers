@@ -313,9 +313,17 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
                 print_r($value, true)
             )
         );
+
+        $errorMessages = array_keys($this->getFormMessages($elementHierarchy));
+        // If error messages has no keys, it is probably because the top level ErrorMessage has been used
+        // therefore check the contents of the error, rather than the key
+        if (array_keys($this->getFormMessages($elementHierarchy)) === [0 => 0]) {
+            $errorMessages = $this->getFormMessages($elementHierarchy);
+        }
+
         $this->assertSame(
             $validationMessages,
-            array_keys($this->getFormMessages($elementHierarchy)),
+            $errorMessages,
             sprintf(
                 '"%s" form element with value "%s" error messages not as expected',
                 implode($elementHierarchy, '.'),
