@@ -1027,6 +1027,22 @@ abstract class AbstractFormValidationTestCase extends \Mockery\Adapter\Phpunit\M
     }
 
     /**
+     * Test if service name as expected
+     *
+     * @param $elementHierarchy
+     * @param $serviceName
+     *
+     * @throws \Exception
+     */
+    public function assertServiceEquals($elementHierarchy, $serviceName)
+    {
+
+        $element =  $this->getFormElement($elementHierarchy);
+        $this->assertContains('service_name', array_keys($element->getOptions()), "service name option not set");
+        $this->assertEquals($element->getOption('service_name'), $serviceName, "service_name option does not match class name provided");
+    }
+
+    /**
      * Get messages for specified element
      *
      * @param array $elementHierarchy  Element and/or Fieldset hierarchy
